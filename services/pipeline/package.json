@@ -4,9 +4,15 @@
   "private": true,
   "type": "module",
   "main": "src/index.ts",
+  "scripts": {
+    "worker": "tsx src/worker.ts"
+  },
   "dependencies": {
     "@observatory/core": "workspace:*",
     "@observatory/db": "workspace:*",
-    "@observatory/scoring-engine": "workspace:*"
+    "@observatory/ingestion": "workspace:*",
+    "@observatory/scoring-engine": "workspace:*",
+    "bullmq": "^5.34.0",
+    "ioredis": "^5.4.2"
   }
 }

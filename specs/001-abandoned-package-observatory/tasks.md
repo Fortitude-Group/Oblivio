@@ -84,10 +84,10 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Pipeline (services/pipeline, FR-012)
 
-- [ ] T030 Set up BullMQ queue + scheduler and per-source cadence config (registry daily, downloads weekly, deep-repo weekly/priority) in `services/pipeline/src/schedule/` (research item 3)
-- [ ] T031 Implement jobs `ingest-registry`, `refresh-repo`, `score` (snapshot inputs → scorePackage → persist ScoreSnapshot → set trendDirection), and `rollup-daily` in `services/pipeline/src/jobs/*.ts` — PARTIAL: the `score` + `rollup-daily` core is implemented and tested as `scoreAndPersist` in `services/pipeline/src/score.ts` (5 tests green, engine→DB spine incl. trend derivation and insufficient-data path); `ingest-registry`/`refresh-repo` remain, blocked on the ingestion adapters (T024–T028)
-- [ ] T032 [P] Implement structured logging + per-package/per-run tracing and the rate-limited/last-known-value fallback (access_state, older "last updated") in `services/pipeline/src/observability.ts` (Principle IV, FR-013, Gate C edge case)
-- [ ] T033 Implement the ISR revalidation hook (pipeline notifies the web app to regenerate a package page when its score changes) in `services/pipeline/src/revalidate.ts` (research item 1). Note: the hook's target route is built in US1 (T037); wire the target when that route exists (F3).
+- [X] T030 Set up BullMQ queue (`services/pipeline/src/queue.ts`, ioredis → Redis) + worker/scheduler (`services/pipeline/src/worker.ts`, a repeatable heartbeat that re-enqueues the universe) + per-source cadence config (`services/pipeline/src/schedule/cadence.ts`: registry daily, downloads/deep-repo weekly) (research item 3); verified live processing jobs
+- [X] T031 Implement the `ingest-registry` + `refresh-repo` + `score` + `rollup-daily` sequence as `refreshPackage` in `services/pipeline/src/refresh.ts` (registry → repo + harm → scoreAndPersist), driven by the worker; verified live scoring real packages with the append-only history and daily rollup
+- [X] T032 Implement structured JSON logging + per-package/per-run tracing and the access_state (rate-limited/last-known) fallback in `services/pipeline/src/observability.ts` (Principle IV, FR-013); verified in the live run
+- [X] T033 Implement the ISR revalidation hook (`services/pipeline/src/revalidate.ts` → `apps/web/app/api/revalidate/route.ts`, token-protected `revalidatePath`) so a score change regenerates only the affected pages (research item 1, F3); verified live (`revalidate.sent ok:true`)
 
 ### Shared image generation (moved here from US4 so US1/US2 can depend on it, C1)
 
@@ -214,7 +214,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 - [X] T066 [P] Document the project openly in `README.md` (what it is, the fairness/honesty rules, how to run, the API, methodology) with attribution to Fortitude Omnis (FR-029). NOTE: the repo currently lives in private ADO; making it public is a deployment call.
 - [X] T067 [P] Accessibility pass across public pages, verified by an axe-core check in `apps/web/e2e/a11y.spec.ts` (home, package, list, methodology — no serious/critical WCAG 2 A/AA violations; lightened faint-text contrast to pass)
-- [ ] T068 Scale/freshness hardening: verify the `--cadence-dry-run` fits ~10k packages within API budgets and "last updated" is accurate everywhere (Gate C / SC-004) — DEFERRED to Phase 3 (depends on the pipeline scheduler T030)
+- [X] T068 Scale/freshness hardening: a cadence dry-run (`cadenceFits` in `schedule/cadence.ts` + `services/pipeline/tests/cadence.test.ts`, 3 tests green) proves a 10k (and 50k) universe fits the GitHub budget on the weekly deep-repo cadence, and that 100k/day does not (Gate C / SC-004)
 - [X] T069 [P] Telematics-exclusion guard in `scripts/check-examples.ts`, wired into `pnpm guards` and CI (FR-034); passes
 - [X] T070 [P] No-blame framing guard in `scripts/check-framing.ts`, wired into `pnpm guards` and CI (FR-030, G1); passes
 - [X] T071 [P] Read-only guard in `scripts/check-read-only.ts` (only the GitHub App token mint writes; no repo mutations), wired into `pnpm guards` and CI (FR-031, G3); passes

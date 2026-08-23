@@ -87,6 +87,15 @@ export async function setUniverseMembership(
     .where(eq(packages.id, input.packageId));
 }
 
+/** All packages currently in the working universe, by rank. */
+export async function listInUniverse(db: Database) {
+  return db
+    .select()
+    .from(packages)
+    .where(eq(packages.inUniverse, true))
+    .orderBy(packages.universeRank);
+}
+
 export async function getPackage(
   db: Database,
   ecosystemId: string,

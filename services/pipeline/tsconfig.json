@@ -5,6 +5,7 @@
     "paths": {
       "@observatory/core": ["packages/core/src/index.ts"],
       "@observatory/db": ["packages/db/src/index.ts"],
+      "@observatory/ingestion": ["packages/ingestion/src/index.ts"],
       "@observatory/scoring-engine": ["packages/scoring-engine/src/index.ts"]
     }
   },
