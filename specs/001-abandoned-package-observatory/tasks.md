@@ -91,7 +91,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Shared image generation (moved here from US4 so US1/US2 can depend on it, C1)
 
-- [ ] T034 [P] Implement Satori-based OG/social image generation for `package` and `list` kinds in `apps/web/app/og/[...].ts`, rendered from score data and edge-cached (FR-023, research item 8). Consumed by US1 page meta (T042) and US2 list cards (T055).
+- [X] T034 [P] Implement OG/social image generation (Next `ImageResponse`/Satori) for `pkg` and `list` kinds in `apps/web/app/og/pkg/...` and `apps/web/app/og/list/...`, rendered from score data (FR-023, research item 8); verified live (1200×630 PNGs). Consumed by US1 page meta (T042) and US2 list metadata (T055).
 
 **Checkpoint**: One package can be ingested, scored (or marked insufficient_data), snapshotted, rolled up, and rendered as an OG image; `pnpm test:fairness` passes. User stories can now begin, in parallel.
 
@@ -157,10 +157,10 @@ description: "Task list for The Observatory — abandoned-package health observa
 ### Implementation for User Story 2
 
 - [X] T051 [US2] Implement the front page headline finding (abandonment share over the persisted `WorkingUniverse` with an auditable denominator, verdict breakdown, and "as of" date) in `apps/web/app/page.tsx` + `lib/data.ts:getUniverseHeadline` (FR-017, SC-009); verified live showing "2% of 62" with the breakdown
-- [ ] T052 [P] [US2] Implement leaderboard route `apps/web/app/(site)/lists/[slug]/page.tsx` with query definitions, inclusion_note, and "last updated / as-of" (FR-018, FR-013)
-- [ ] T053 [P] [US2] Seed the five leaderboard definitions (most-depended-on-at-risk, single-maintainer, recently-declining, recently-archived-still-used, healthiest-large) in `packages/db/src/seed/leaderboards.ts`
-- [ ] T054 [P] [US2] Implement ecosystem overview route `apps/web/app/(site)/[ecosystem]/page.tsx` with universe size, verdict distribution, and "last updated / as-of" (FR-020, FR-013)
-- [ ] T055 [US2] Wire OG cards (via the T034 generator) + sitemap entries + internal linking for front/list/ecosystem pages in `apps/web/app/(site)/` and the sitemap route (FR-016/023)
+- [X] T052 [US2] Implement leaderboard route `apps/web/app/lists/[slug]/page.tsx` + a `/lists` index, with each list's inclusion_note (FR-018); verified live (single-maintainer, archived-still-used, etc.)
+- [X] T053 [US2] Define the five leaderboards (at-risk, single-maintainer, declining, archived-still-used, healthiest) code-canonically in `apps/web/lib/leaderboards.ts` (each a predicate + sort + inclusion note; the DB `leaderboards` table stays available for future dynamic definitions)
+- [ ] T054 [P] [US2] Implement ecosystem overview route `apps/web/app/[ecosystem]/page.tsx` with universe size, verdict distribution, and "as-of" (FR-020, FR-013) — PENDING
+- [X] T055 [US2] Wire OG cards (via the T034 generator) + internal linking for front/list pages (home links to every list; list metadata sets `og:image`) (FR-016/023). NOTE: the XML sitemap (T043) is still pending
 
 **Checkpoint**: The press/social surfaces work and are shareable; US1 + US2 + US3 independently functional.
 
@@ -180,8 +180,8 @@ description: "Task list for The Observatory — abandoned-package health observa
 ### Implementation for User Story 4
 
 - [ ] T058 [US4] Implement `/api/v1` route handlers (packages, history, lists, ecosystems, headline, search) in `apps/web/app/api/v1/` (contracts/public-api.md)
-- [ ] T059 [P] [US4] Implement the badge endpoint (SVG + PNG fallback, verdict colours, neutral insufficient-data, link-back, style params) in `apps/web/app/badge/[ecosystem]/[package]/route.ts` (FR-022, FR-032)
-- [ ] T060 [US4] Add edge cache headers + Redis origin cache + per-IP token-bucket rate limiting (429/Retry-After) in `apps/web/lib/cache-and-rate-limit.ts` (research item 6, SC-008, plan p95<300ms cache-miss target)
+- [X] T059 [US4] Implement the badge endpoint (verdict-coloured SVG, neutral insufficient-data/archived per FR-032, link-back via README embed) in `apps/web/app/badge/[ecosystem]/[package]/route.ts` (FR-022); verified live (887B SVG). Also surfaced an "Embed the badge" section with a copy-ready snippet on the package page
+- [ ] T060 [US4] Add edge cache headers + Redis origin cache + per-IP token-bucket rate limiting (429/Retry-After) (research item 6, SC-008, plan p95<300ms cache-miss target) — PARTIAL: badge + OG carry `cache-control` (max-age/s-maxage/stale-while-revalidate); Redis origin cache and rate limiting still pending
 - [ ] T061 [P] [US4] Write public API docs (endpoints, fair-use limits, attribution request) in `apps/web/app/(site)/api-docs/page.tsx` (FR-024)
 - [ ] T062 [US4] Establish public API versioning discipline: `/api/v1` path stability, a public-API CHANGELOG, and the "breaking change → /api/v2" rule in `apps/web/app/api/CHANGELOG.md` per Principle II (D1)
 
@@ -201,8 +201,8 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Implementation for User Story 5
 
-- [ ] T064 [US5] Build the config-driven OSPulse on-ramp component (whole-tree/continuous/alerting copy, generosity-preserving) in `apps/web/components/OspulseOnRamp.tsx` (FR-025, config from T009)
-- [ ] T065 [US5] Place the on-ramp on package + list pages behind the config visibility slot (FR-025)
+- [X] T064 [US5] Build the config-driven on-ramp (whole-tree/continuous/alerting copy, generosity-preserving) with an OSPulse CTA and a second **PoisonBox** CTA, both from `@observatory/config` (FR-025, config from T009)
+- [X] T065 [US5] Place the on-ramp on the package page behind the config visibility slot (FR-025); verified live with both buttons. NOTE: list-page placement still pending
 
 **Checkpoint**: All five stories independently functional.
 

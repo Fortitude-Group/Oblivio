@@ -31,6 +31,7 @@ export async function generateMetadata({
   const style = VERDICT_STYLE[verdict];
   const cfg = loadConfig();
   const url = `${cfg.baseUrl}/${ecosystem}/${name}`;
+  const ogImage = `${cfg.baseUrl}/og/pkg/${ecosystem}/${name}`;
   const title = `Is ${name} maintained?`;
   return {
     title,
@@ -42,11 +43,13 @@ export async function generateMetadata({
       url,
       siteName: "The Observatory",
       type: "website",
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: `${name} · ${style.label}`,
       description: style.tagline,
+      images: [ogImage],
     },
   };
 }
@@ -309,17 +312,46 @@ export default async function PackagePage({
         <a href="/methodology">How we score →</a>
       </div>
 
-      {/* honest OSPulse on-ramp */}
-      {cfg.ospulseOnRamp.enabled && (
+      {/* embeddable badge */}
+      <section className="section">
+        <div className="section-head">
+          <h2>Embed the badge</h2>
+        </div>
+        <div className="panel badge-box">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/badge/${ecosystem}/${name}`}
+            alt={`Observatory: ${style.label}`}
+            height={20}
+          />
+          <code>{`[![Observatory](${cfg.baseUrl}/badge/${ecosystem}/${name})](${cfg.baseUrl}/${ecosystem}/${name})`}</code>
+        </div>
+      </section>
+
+      {/* honest on-ramp: OSPulse + the related PoisonBox */}
+      {(cfg.ospulseOnRamp.enabled || cfg.poisonBox.enabled) && (
         <div className="onramp">
           <p>
             <b>Watching more than one package?</b> The Observatory checks one
             package at a time, free, forever. OSPulse watches your whole
             dependency tree and tells you the moment one starts to slide.
           </p>
-          <a className="cta" href={cfg.ospulseOnRamp.href} rel="noreferrer">
-            Explore OSPulse
-          </a>
+          <div className="onramp-actions">
+            {cfg.ospulseOnRamp.enabled && (
+              <a className="cta" href={cfg.ospulseOnRamp.href} rel="noreferrer">
+                Explore OSPulse
+              </a>
+            )}
+            {cfg.poisonBox.enabled && (
+              <a
+                className="cta secondary"
+                href={cfg.poisonBox.href}
+                rel="noreferrer"
+              >
+                Explore PoisonBox
+              </a>
+            )}
+          </div>
         </div>
       )}
 

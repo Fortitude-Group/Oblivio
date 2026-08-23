@@ -5,7 +5,11 @@ import {
   getLatestUniverse,
   schema,
 } from "@observatory/db";
-import { ECOSYSTEMS, type Verdict } from "@observatory/core";
+import {
+  ECOSYSTEMS,
+  type Verdict,
+  type TrendDirection,
+} from "@observatory/core";
 import { getDb } from "./db";
 
 export async function getPackageView(ecosystem: string, name: string) {
@@ -72,4 +76,42 @@ export async function listScoredPackages() {
   return rows
     .filter((r) => r.snapshot !== null)
     .sort((a, b) => (b.snapshot!.overallScore ?? -1) - (a.snapshot!.overallScore ?? -1));
+}
+
+export interface ScoredRow {
+  id: string;
+  ecosystem: string;
+  name: string;
+  verdict: Verdict;
+  score: number | null;
+  trend: TrendDirection | null;
+  busFactor: number | null;
+  downloads: number;
+  transitiveDependents: number;
+}
+
+/** Every scored package, enriched with the fields the leaderboards rank on. */
+export async function getScoredRows(): Promise<ScoredRow[]> {
+  const db = getDb();
+  const pkgs = await db.select().from(schema.packages);
+  const rows = await Promise.all(
+    pkgs.map(async (pkg): Promise<ScoredRow | null> => {
+      const s = await getLatestScore(db, pkg.id);
+      if (!s) return null;
+      const busFactor =
+        s.signalBreakdown.find((x) => x.key === "bus_factor")?.rawValue ?? null;
+      return {
+        id: pkg.id,
+        ecosystem: pkg.ecosystemId,
+        name: pkg.name,
+        verdict: s.verdict as Verdict,
+        score: s.overallScore,
+        trend: (s.trendDirection as TrendDirection | null) ?? null,
+        busFactor,
+        downloads: pkg.downloadCount,
+        transitiveDependents: pkg.transitiveDependentsCount,
+      };
+    }),
+  );
+  return rows.filter((r): r is ScoredRow => r !== null);
 }

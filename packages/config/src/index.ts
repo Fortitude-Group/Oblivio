@@ -21,11 +21,18 @@ export interface OspulseOnRampConfig {
   href: string;
 }
 
+export interface SiblingLink {
+  enabled: boolean;
+  href: string;
+}
+
 export interface ObservatoryConfig {
   /** Canonical base URL used for links, canonical tags, and sitemaps. */
   baseUrl: string;
   brand: BrandConfig;
   ospulseOnRamp: OspulseOnRampConfig;
+  /** A second, related Fortitude property surfaced alongside the OSPulse on-ramp. */
+  poisonBox: SiblingLink;
 }
 
 export const DEFAULT_CONFIG: ObservatoryConfig = {
@@ -37,6 +44,10 @@ export const DEFAULT_CONFIG: ObservatoryConfig = {
   ospulseOnRamp: {
     enabled: true,
     href: "https://ospulse.fortitude-omnis.group",
+  },
+  poisonBox: {
+    enabled: true,
+    href: "https://poisonbox.fortitude-omnis.group",
   },
 };
 
@@ -61,6 +72,13 @@ export function loadConfig(
           ? DEFAULT_CONFIG.ospulseOnRamp.enabled
           : onRampEnabled === "true",
       href: env.OBSERVATORY_ONRAMP_HREF ?? DEFAULT_CONFIG.ospulseOnRamp.href,
+    },
+    poisonBox: {
+      enabled:
+        env.OBSERVATORY_POISONBOX_ENABLED === undefined
+          ? DEFAULT_CONFIG.poisonBox.enabled
+          : env.OBSERVATORY_POISONBOX_ENABLED === "true",
+      href: env.OBSERVATORY_POISONBOX_HREF ?? DEFAULT_CONFIG.poisonBox.href,
     },
   };
 }

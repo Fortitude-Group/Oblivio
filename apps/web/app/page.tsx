@@ -3,6 +3,7 @@ import type { Verdict } from "@observatory/core";
 import { VERDICT_STYLE } from "../lib/verdict";
 import { fullDate } from "../lib/format";
 import { listScoredPackages, getUniverseHeadline } from "../lib/data";
+import { LEADERBOARDS } from "../lib/leaderboards";
 
 export const revalidate = 3600;
 
@@ -75,6 +76,25 @@ export default async function Home() {
           </p>
         </section>
       )}
+
+      <section className="section">
+        <div className="section-head">
+          <h2>Leaderboards</h2>
+          <a href="/lists">All lists →</a>
+        </div>
+        <div className="grid">
+          {LEADERBOARDS.map((l) => (
+            <a className="card" key={l.slug} href={`/lists/${l.slug}`}>
+              <div className="cn" style={{ marginTop: 0 }}>
+                {l.title}
+              </div>
+              <p style={{ color: "var(--text-dim)", fontSize: 13.5 }}>
+                {l.blurb}
+              </p>
+            </a>
+          ))}
+        </div>
+      </section>
 
       <section className="section">
         <div className="section-head">
