@@ -547,8 +547,17 @@ a {
 .badge-box {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 16px;
   padding: 24px;
+}
+.badge-box img {
+  align-self: flex-start;
+  height: 20px;
+  width: auto;
+}
+.badge-box code {
+  align-self: stretch;
 }
 .badge-box code {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -619,6 +628,16 @@ a {
   color: var(--text);
   font-family: var(--font-display), sans-serif;
   font-weight: 600;
+}
+
+/* ---- trend chart ---- */
+.trendchart {
+  padding: 18px 20px;
+}
+.trendchart svg {
+  width: 100%;
+  height: 150px;
+  display: block;
 }
 
 /* ---- search ---- */

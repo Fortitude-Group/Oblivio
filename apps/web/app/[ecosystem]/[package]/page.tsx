@@ -7,6 +7,7 @@ import { loadConfig } from "@observatory/config";
 import { VERDICT_STYLE } from "../../../lib/verdict";
 import { compact, fullDate, relativeTime } from "../../../lib/format";
 import { getPackageView } from "../../../lib/data";
+import { TrendChart } from "../../../components/TrendChart";
 
 export const revalidate = 3600; // ISR: regenerate on the pipeline's cadence.
 
@@ -76,7 +77,7 @@ export default async function PackagePage({
   const view = await getPackageView(ecosystem, name);
   if (!view) notFound();
 
-  const { pkg, snapshot } = view;
+  const { pkg, snapshot, daily } = view;
   const verdict = (snapshot?.verdict ?? "insufficient_data") as Verdict;
   const style = VERDICT_STYLE[verdict];
   const score = snapshot?.overallScore ?? null;
@@ -231,6 +232,12 @@ export default async function PackagePage({
           </div>
         </div>
       </section>
+
+      {/* health over time */}
+      <TrendChart
+        points={daily.map((d) => ({ day: d.day, score: d.overallScore }))}
+        accent={style.accent}
+      />
 
       {/* signal breakdown */}
       {verdict !== "insufficient_data" ? (

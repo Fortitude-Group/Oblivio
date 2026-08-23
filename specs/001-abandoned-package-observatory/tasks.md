@@ -112,7 +112,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 - [X] T037 [US1] Implement the per-package ISR route `apps/web/app/[ecosystem]/[package]/page.tsx` (revalidate=3600) reading current score + facts via `packages/db` (research item 1); verified live rendering real DB scores
 - [X] T038 [US1] Build the verdict + signal-breakdown (every number traces to a signal with per-signal contribution points, Principle XII) — rendered in the package route with colour-coded bars
-- [ ] T039 [US1] Build the trend chart from `ScoreDaily` (FR-011) — PARTIAL: trend shown as a direction chip; a real chart waits until history has more than one snapshot per package
+- [X] T039 [US1] Build the trend chart from `ScoreDaily` (FR-011): a "Health over time" SVG area sparkline (`apps/web/components/TrendChart.tsx` + pure `sparklinePaths` in `apps/web/lib/chart.ts`, 3 unit tests) on the package page, with a graceful fallback when there's fewer than two data points; verified rendering live
 - [X] T040 [US1] Build the key-facts panel (release, version, downloads, bus factor, licence, trend, incl. "last updated") (FR-013)
 - [X] T041 [US1] Build the insufficient-data state (reason shown, no numeric score) (FR-007)
 - [X] T042 [US1] Add SEO markup: metadata, canonical (config-driven host), Open Graph/Twitter tags, and JSON-LD (SoftwareSourceCode) via `generateMetadata` on the package route (FR-016). NOTE: OG *image* generation (T034) still pending; tags reference it
@@ -131,7 +131,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Tests for User Story 3
 
-- [ ] T045 [P] [US3] E2E test: every score links to methodology; two same-verdict packages share rule-driven breakdowns (no per-package tuning) in `apps/web/tests/e2e/methodology.spec.ts` (FR-009)
+- [X] T045 [US3] Playwright E2E in `apps/web/e2e/methodology.spec.ts` (green): every score links to `/methodology`, and two packages show the identical rule-driven signal set (no per-package tuning, FR-009)
 
 ### Implementation for User Story 3
 
