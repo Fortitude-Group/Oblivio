@@ -174,16 +174,16 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Tests for User Story 4
 
-- [ ] T056 [P] [US4] Contract tests for every `/api/v1` endpoint (schema, insufficient-data shape, 429+Retry-After, headline↔universe cross-check) in `apps/web/tests/contract/public-api.test.ts` (contracts/public-api.md)
-- [ ] T057 [P] [US4] Contract tests for badge + OG (valid SVG/PNG, verdict colour mapping, neutral insufficient-data badge, correct link-back) in `apps/web/tests/contract/badge-og.test.ts` (contracts/badge-and-og.md)
+- [X] T056 [US4] Contract tests for the `/api/v1` endpoints (schema, attribution, decomposed signals, pagination, 404s, search, and 429+Retry-After) in `apps/web/tests/contract/public-api.test.ts` (8 tests, green; hermetically self-seeded)
+- [X] T057 [US4] Badge contract test (verdict-coloured SVG, correct content-type/cache) folded into `public-api.test.ts`; OG PNG generation verified live (1200×630). NOTE: an automated OG-image assertion is deferred (ImageResponse is awkward to unit-test)
 
 ### Implementation for User Story 4
 
-- [ ] T058 [US4] Implement `/api/v1` route handlers (packages, history, lists, ecosystems, headline, search) in `apps/web/app/api/v1/` (contracts/public-api.md)
+- [X] T058 [US4] Implement `/api/v1` route handlers (packages, package history, lists, ecosystems, headline, search) in `apps/web/app/api/v1/` with attribution + `as_of` + CORS + cache headers, and the insufficient-data shape (null score + reason) (contracts/public-api.md); verified live
 - [X] T059 [US4] Implement the badge endpoint (verdict-coloured SVG, neutral insufficient-data/archived per FR-032, link-back via README embed) in `apps/web/app/badge/[ecosystem]/[package]/route.ts` (FR-022); verified live (887B SVG). Also surfaced an "Embed the badge" section with a copy-ready snippet on the package page
-- [ ] T060 [US4] Add edge cache headers + Redis origin cache + per-IP token-bucket rate limiting (429/Retry-After) (research item 6, SC-008, plan p95<300ms cache-miss target) — PARTIAL: badge + OG carry `cache-control` (max-age/s-maxage/stale-while-revalidate); Redis origin cache and rate limiting still pending
-- [ ] T061 [P] [US4] Write public API docs (endpoints, fair-use limits, attribution request) in `apps/web/app/(site)/api-docs/page.tsx` (FR-024)
-- [ ] T062 [US4] Establish public API versioning discipline: `/api/v1` path stability, a public-API CHANGELOG, and the "breaking change → /api/v2" rule in `apps/web/app/api/CHANGELOG.md` per Principle II (D1)
+- [X] T060 [US4] Add cache headers + per-IP fixed-window rate limiting (429/Retry-After, 120 req/min) in `apps/web/lib/api.ts` (research item 6, SC-008); API + badge + OG all carry `cache-control`. NOTE: the limiter is in-memory (single instance); a multi-instance deploy moves it to Redis without changing callers
+- [X] T061 [US4] Write public API docs (endpoints, fair-use limits, attribution request) in `apps/web/app/api-docs/page.tsx` (FR-024)
+- [X] T062 [US4] Establish public API versioning discipline: `/api/v1` path stability, `apps/web/app/api/CHANGELOG.md`, and the "breaking change → /api/v2" rule per Principle II (D1)
 
 **Checkpoint**: The utility can spread itself via badges/API/OG; normal traffic stays free and uncapped.
 

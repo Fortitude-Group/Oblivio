@@ -11,6 +11,7 @@ export default defineConfig({
         "packages/scoring-engine/src/index.ts",
       ),
       "@observatory/db": resolve(__dirname, "packages/db/src/index.ts"),
+      "@web": resolve(__dirname, "apps/web"),
       "@observatory/ingestion": resolve(
         __dirname,
         "packages/ingestion/src/index.ts",

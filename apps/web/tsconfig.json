@@ -16,6 +16,7 @@
     "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
+      "@web/*": ["./*"],
       "@observatory/config": ["../../packages/config/src/index.ts"],
       "@observatory/core": ["../../packages/core/src/index.ts"],
       "@observatory/db": ["../../packages/db/src/index.ts"],
