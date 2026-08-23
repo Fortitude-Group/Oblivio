@@ -18,9 +18,14 @@ export function credsFromEnv(
   const appId = env.GITHUB_APP_ID;
   const installationId = env.GITHUB_APP_INSTALLATION_ID;
   const inline = env.GITHUB_APP_PRIVATE_KEY;
+  const base64 = env.GITHUB_APP_PRIVATE_KEY_BASE64;
   const path = env.GITHUB_APP_PRIVATE_KEY_PATH;
-  if (!appId || !installationId || (!inline && !path)) return null;
-  const privateKey = inline ?? readFileSync(path!, "utf8");
+  if (!appId || !installationId || (!inline && !base64 && !path)) return null;
+  const privateKey = inline
+    ? inline
+    : base64
+      ? Buffer.from(base64, "base64").toString("utf8")
+      : readFileSync(path!, "utf8");
   return { appId, installationId, privateKey };
 }
 

@@ -1,0 +1,67 @@
+# Scheduled refresh pipeline for The Observatory.
+#
+# Runs on a cron in Azure DevOps (free), replacing an always-on worker. Each run
+# syncs universe membership from ecosyste.ms and scores the stalest packages
+# against the Neon database, then the pages revalidate. No Redis, no server.
+#
+# Required pipeline variables (mark secrets as secret):
+#   DATABASE_URL                     Neon pooled connection string
+#   GITHUB_APP_ID                    GitHub App id
+#   GITHUB_APP_INSTALLATION_ID       GitHub App installation id
+#   GITHUB_APP_PRIVATE_KEY_BASE64    base64 of the App private-key .pem  (secret)
+#   WEB_BASE_URL                     the deployed site, e.g. https://oblivio.fortitude-omnis.group
+#   REVALIDATE_TOKEN                 shared token, matches the site's env  (secret)
+# Optional: UNIVERSE_SIZE (default 1000), BATCH_SIZE (default 400).
+
+schedules:
+  - cron: "0 */6 * * *"
+    displayName: Refresh scores every 6 hours
+    branches:
+      include:
+        - master
+    always: true
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  UNIVERSE_SIZE: "1000"
+  BATCH_SIZE: "400"
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: "22.x"
+    displayName: Use Node 22
+
+  - script: corepack enable && corepack prepare pnpm@10.33.2 --activate
+    displayName: Enable pnpm
+
+  - script: pnpm install --frozen-lockfile
+    displayName: Install
+
+  - script: pnpm --filter @observatory/db db:migrate
+    displayName: Migrate (idempotent)
+    env:
+      DATABASE_URL: $(DATABASE_URL)
+
+  - script: |
+      pnpm exec tsx scripts/sync-universe.ts npm $(UNIVERSE_SIZE)
+      pnpm exec tsx scripts/sync-universe.ts pypi $(UNIVERSE_SIZE)
+      pnpm exec tsx scripts/sync-universe.ts nuget $(UNIVERSE_SIZE)
+    displayName: Sync universe membership (ecosyste.ms)
+    env:
+      DATABASE_URL: $(DATABASE_URL)
+
+  - script: pnpm exec tsx scripts/score-batch.ts $(BATCH_SIZE)
+    displayName: Score the stalest packages
+    env:
+      DATABASE_URL: $(DATABASE_URL)
+      GITHUB_APP_ID: $(GITHUB_APP_ID)
+      GITHUB_APP_INSTALLATION_ID: $(GITHUB_APP_INSTALLATION_ID)
+      GITHUB_APP_PRIVATE_KEY_BASE64: $(GITHUB_APP_PRIVATE_KEY_BASE64)
+      WEB_BASE_URL: $(WEB_BASE_URL)
+      REVALIDATE_TOKEN: $(REVALIDATE_TOKEN)

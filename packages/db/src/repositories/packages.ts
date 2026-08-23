@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { ecosystems, packages, repositories } from "../schema";
 import { packageUpsertSchema, type PackageUpsert } from "../validation";
@@ -94,6 +94,31 @@ export async function listInUniverse(db: Database) {
     .from(packages)
     .where(eq(packages.inUniverse, true))
     .orderBy(packages.universeRank);
+}
+
+/**
+ * In-universe packages ordered by how stale their score is (never-scored first,
+ * then oldest score). Drives the batch refresh so the whole universe cycles on
+ * the cadence without an always-on worker.
+ */
+export async function listStalePackages(
+  db: Database,
+  limit: number,
+): Promise<Array<{ id: string; ecosystemId: string; name: string }>> {
+  const result = await db.execute(sql`
+    select p.id, p.ecosystem_id as "ecosystemId", p.name
+    from packages p
+    where p.in_universe = true
+    order by (
+      select max(s.computed_at) from score_snapshots s where s.package_id = p.id
+    ) asc nulls first
+    limit ${limit}
+  `);
+  return result as unknown as Array<{
+    id: string;
+    ecosystemId: string;
+    name: string;
+  }>;
 }
 
 export async function getPackage(
