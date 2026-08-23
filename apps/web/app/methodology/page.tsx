@@ -51,6 +51,31 @@ export default function Methodology() {
 
       <section className="section">
         <div className="section-head">
+          <h2>What a score is not</h2>
+        </div>
+        <div className="panel signals">
+          <p style={{ color: "var(--text-dim)", maxWidth: "70ch" }}>
+            Insufficient data is never dressed up as a low score. If we cannot
+            resolve a reachable source repository, the package shows
+            &ldquo;insufficient data&rdquo; and no number, not a zero.
+          </p>
+          <p
+            style={{
+              color: "var(--text-dim)",
+              maxWidth: "70ch",
+              marginTop: 12,
+            }}
+          >
+            And this is maintenance health, not vulnerability scanning. A healthy
+            score does not mean a package has no known CVEs, and an unhealthy one
+            is not a vuln report. Abandonment is upstream of that: an unmaintained
+            package is the one that will not get the fix.
+          </p>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-head">
           <h2>Activity signals</h2>
           <span style={{ color: "var(--text-faint)", fontSize: 13 }}>
             weights sum to 100

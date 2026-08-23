@@ -135,9 +135,9 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Implementation for User Story 3
 
-- [ ] T046 [US3] Generate the methodology page from the scoring-engine's exported signal constants + rubric weights + fairness rules + sources/limits + cadence in `apps/web/app/(site)/methodology/page.tsx` (FR-021; code-canonical so it cannot drift, F1)
-- [ ] T047 [P] [US3] Add the "insufficient data ≠ low score" and "maintenance health ≠ vulnerability scanning" explanations to the methodology page (FR-032, spec scope note)
-- [ ] T048 [US3] Ensure every score surface links to `/methodology` via a shared component in `apps/web/components/MethodologyLink.tsx`
+- [X] T046 [US3] Generate the methodology page from the scoring-engine's exported `SIGNAL_CATALOGUE` + weights + the fairness rule in `apps/web/app/methodology/page.tsx` (FR-021; code-canonical so it cannot drift, F1)
+- [X] T047 [US3] Added the "insufficient data ≠ low score" and "maintenance health ≠ vulnerability scanning" explanations to the methodology page (FR-032, spec scope note)
+- [X] T048 [US3] Every score surface links to `/methodology` (package page "Full methodology →" and "How we score →" links; footer note on lists) (FR-009)
 
 **Checkpoint**: Numbers are defensible and consistently rule-driven. US1 + US3 = a complete, trustworthy single-package utility.
 
