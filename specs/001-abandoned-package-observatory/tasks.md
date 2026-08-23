@@ -212,14 +212,14 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 **Purpose**: Openness, framing integrity, accessibility, scale hardening, and end-to-end validation
 
-- [ ] T066 [P] Make the repo public with methodology + data sources documented openly (FR-029) and add attribution/licence notes in `README.md` and `docs/`
-- [ ] T067 [P] Accessibility pass (semantic markup, contrast, keyboard nav) across public pages, verified in `apps/web/tests/e2e/a11y.spec.ts`
-- [ ] T068 Scale/freshness hardening: verify the `--cadence-dry-run` fits ~10k packages within API budgets and that "last updated" is accurate everywhere (Gate C / SC-004) via `services/pipeline/tests/cadence.test.ts`
-- [ ] T069 [P] Verify the fleet/vehicle-telematics exclusion in hand-picked examples and copy (FR-034) via a lint check `scripts/check-examples.ts`
-- [ ] T070 [P] No-blame framing guard: review verdict/methodology/on-ramp copy for no name-and-shame language and add a lint/test asserting no blame-framing or maintainer-shaming terms in `scripts/check-framing.ts` (FR-030, G1)
-- [ ] T071 [P] Read-only guard: a CI/architecture test asserting no repo-write scopes are requested and no repo-mutation/outreach API calls exist in the codebase in `scripts/check-read-only.ts` (FR-031, G3)
-- [ ] T072 Run the full `quickstart.md` validation end to end and record results
-- [ ] T073 Run the merge gate: `pnpm lint && pnpm build && pnpm test && pnpm test:fairness && pnpm test:e2e` all green
+- [X] T066 [P] Document the project openly in `README.md` (what it is, the fairness/honesty rules, how to run, the API, methodology) with attribution to Fortitude Omnis (FR-029). NOTE: the repo currently lives in private ADO; making it public is a deployment call.
+- [X] T067 [P] Accessibility pass across public pages, verified by an axe-core check in `apps/web/e2e/a11y.spec.ts` (home, package, list, methodology — no serious/critical WCAG 2 A/AA violations; lightened faint-text contrast to pass)
+- [ ] T068 Scale/freshness hardening: verify the `--cadence-dry-run` fits ~10k packages within API budgets and "last updated" is accurate everywhere (Gate C / SC-004) — DEFERRED to Phase 3 (depends on the pipeline scheduler T030)
+- [X] T069 [P] Telematics-exclusion guard in `scripts/check-examples.ts`, wired into `pnpm guards` and CI (FR-034); passes
+- [X] T070 [P] No-blame framing guard in `scripts/check-framing.ts`, wired into `pnpm guards` and CI (FR-030, G1); passes
+- [X] T071 [P] Read-only guard in `scripts/check-read-only.ts` (only the GitHub App token mint writes; no repo mutations), wired into `pnpm guards` and CI (FR-031, G3); passes
+- [X] T072 Updated `quickstart.md` to the real commands and validated it end to end (setup, fairness gate, ingest, universe build, site, API, badge, full gate)
+- [X] T073 Merge gate green: `pnpm lint && pnpm build && pnpm test && pnpm test:fairness && pnpm guards` (60 tests) plus `pnpm test:e2e` (12 Playwright specs incl. CWV + a11y)
 
 ---
 

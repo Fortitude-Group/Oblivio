@@ -1,60 +1,74 @@
 # Quickstart & Validation Guide: The Observatory
 
-**Feature**: 001-abandoned-package-observatory | **Date**: 2026-08-22
+**Feature**: 001-abandoned-package-observatory | **Updated**: 2026-08-23
 
-Runnable scenarios that prove the feature works end-to-end. These map to the spec's user stories and success criteria; they are validation steps, not implementation. Commands assume the pnpm monorepo (`pnpm install` at root) with Postgres + Redis available (a `docker compose up` dev stack provides both).
+Runnable steps that prove the feature works end to end. Updated to match the
+implemented commands. Requires Node 22, pnpm, and Docker.
 
-## Prerequisites
-- Node.js 22 LTS, pnpm, Docker (Postgres 16 + Redis 7 dev stack).
-- A GitHub App credential and a GitLab token in the dev `.env` (never committed) for repo ingestion.
-- `pnpm db:migrate` to create the schema; `pnpm db:seed:validation` to load the labelled validation set.
+## Setup
 
-## Fairness gate first (Gate A / SC-001 — blocks everything)
+```bash
+pnpm install
+pnpm dev:stack                                  # Postgres (host 5433) + Redis (host 6380)
+pnpm --filter @observatory/db db:migrate        # schema + append-only guard trigger
 ```
+
+Local DB URL: `postgres://observatory:observatory@localhost:5433/observatory`
+(set `DATABASE_URL` to it for the commands below).
+
+Repo ingestion needs a GitHub App credential in the environment
+(`GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID`, `GITHUB_APP_PRIVATE_KEY_PATH`).
+
+## The fairness gate first (Gate A / SC-001)
+
+```bash
 pnpm test:fairness
 ```
-**Expected**: the rubric scores the hand-labelled set with ≥95% precision on the `finished_healthy` class; no `finished_healthy` package is labelled `at_risk`/`slowing_down`. A failure here is a hard stop — no scores publish (research item 7, contract guarantee 3).
+The rubric must keep ≥95% precision on the finished-but-healthy class, and no
+finished-healthy fixture may be labelled at risk. A failure here is a hard stop.
 
-## Scenario 1 — Searcher gets a fair verdict (US1, P1)
-1. `pnpm pipeline:ingest --package npm/lodash` then `pnpm pipeline:score --package npm/lodash`.
-2. Start the site: `pnpm --filter web dev`.
-3. Open `/npm/lodash`.
-- **Expected**: plain-language verdict, per-signal breakdown, trend chart, key facts (last release, maintainers, bus factor, dependents, licence), links to repo/registry/methodology, and a visible "last updated". CWV check (`pnpm test:cwv -- /npm/lodash`) reports LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1 (SC-007).
-4. Open a package with an unresolvable repo (fixture `npm/__no-repo-fixture`).
-- **Expected**: "insufficient data" with reason, **no numeric score** (FR-007).
+## Scenario 1 — Score one real package (US1)
 
-## Scenario 2 — Browser explores the ecosystem (US2, P2)
-1. Run a universe build over the seed set: `pnpm pipeline:universe:build`.
-2. Open `/` (front page).
-- **Expected**: headline finding (at-risk share over the persisted WorkingUniverse), ecosystem breakdown, and an "as of" date. Cross-check: `GET /api/v1/headline` → `at_risk_share` matches the count derivable from the referenced universe snapshot (Principle XII).
-3. Open `/lists/single-maintainer` and `/npm` (ecosystem overview).
-- **Expected**: each has its own stable URL, ranked items, `inclusion_note`, and an OG card (`/og/list/single-maintainer.png` returns a valid PNG).
-4. Search a name in the search box → lands on its health page (FR-019).
-
-## Scenario 3 — Methodology makes numbers defensible (US3, P1)
-1. From any score, follow the methodology link → `/methodology`.
-- **Expected**: every signal, the rubric and weights, the fairness rules, what the score does/does not mean (maintenance health ≠ vuln scanning), data sources/limits, and update cadence. Two packages with the same verdict show the same rule-driven breakdown (no per-package tuning, FR-009).
-
-## Scenario 4 — Badges, share cards, open data (US4, P3)
-1. `GET /badge/npm/lodash.svg` → valid SVG, verdict-coloured, links back to `/npm/lodash`.
-2. `GET /api/v1/packages/npm/lodash` → schema-valid JSON with `signals[]`, `as_of`, `attribution`, no account required.
-3. Hammer the API past the fair-use limit → `429` + `Retry-After`; normal traffic served from cache (SC-008).
-
-## Scenario 5 — Honest OSPulse on-ramp (US5, P3)
-1. On `/npm/lodash` and a list page, confirm a single, non-alarmist OSPulse prompt framed as whole-tree/continuous/alerting, with all package data fully present and nothing gated.
-
-## Freshness & scale (Gate C / SC-004)
+```bash
+pnpm exec tsx scripts/ingest-one.ts npm lodash
+pnpm exec tsx scripts/ingest-one.ts npm request    # expect: archived
+pnpm exec tsx scripts/ingest-one.ts pypi requests  # expect: actively_maintained
 ```
-pnpm pipeline:run --universe --cadence-dry-run
-```
-- **Expected**: the run plan fits ≈10k packages within the configured cadence and the GitHub/GitLab + registry rate budgets (conditional requests + priority queue); every surface shows an accurate "last updated"; a rate-limited repo falls back to last-known values with an older timestamp, not a blank or a guess.
+Each run resolves the repo, fetches live GitHub activity, mines harm signals,
+scores, and persists a snapshot. An unresolvable repo prints `insufficient_data`
+with no number.
 
-## Placement-agnostic check (FR-027)
-- Set `OBSERVATORY_BASE_URL` / brand tokens in `packages/config` to a standalone value, then to an OSPulse-section value; rebuild.
-- **Expected**: canonical URLs, sitemap host, and nav/branding follow config with no code change; no host hard-coded.
+## Scenario 2 — Build a universe and the headline (US2)
 
-## Full suite (merge gate)
+```bash
+pnpm exec tsx scripts/build-universe.ts npm
+pnpm exec tsx scripts/build-universe.ts pypi
+pnpm --filter @observatory/web dev                 # http://localhost:3010
 ```
-pnpm lint && pnpm build && pnpm test && pnpm test:fairness && pnpm test:e2e
+Open `/` for the headline finding over the persisted universe, `/npm` and `/pypi`
+for the per-ecosystem overviews, `/lists/single-maintainer` for the leaderboards,
+and use the search box to jump to any package.
+
+## Scenario 3 — Per-package page, badge, API (US1/US4)
+
+- `/npm/lodash` — verdict, decomposed signals, key facts, the embed badge, and the
+  OSPulse + PoisonBox on-ramp.
+- `GET /api/v1/packages/npm/lodash` — schema-valid JSON with signals, `as_of`, and
+  `attribution`, no account required.
+- `GET /badge/npm/lodash` — the embeddable SVG badge.
+- Hammer the API past 120 req/min and get a `429` with `Retry-After`.
+
+## Full gate
+
+```bash
+pnpm lint            # prettier
+pnpm build           # tsc --noEmit across the workspace
+pnpm test            # 60 unit + integration tests (DB tests need DATABASE_URL)
+pnpm test:fairness   # the blocking fairness gate
+pnpm guards          # no-blame framing, telematics exclusion, read-only
+pnpm test:e2e        # 12 Playwright specs incl. CWV and accessibility (needs the site running with data)
 ```
-All green + fairness gate passing + CWV within thresholds = the feature's Definition of Done for this slice.
+
+All green is the Definition of Done for the implemented slice. Note: `pnpm test`
+truncates the database to seed hermetic fixtures, so rebuild the universe
+afterwards if you want the live site populated again.

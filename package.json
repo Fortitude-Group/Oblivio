@@ -13,6 +13,7 @@
     "lint": "prettier --check \"packages/**/*.{ts,md,json}\"",
     "format": "prettier --write \"packages/**/*.{ts,md,json}\"",
     "test:e2e": "pnpm --filter @observatory/web e2e",
+    "guards": "tsx scripts/check-framing.ts && tsx scripts/check-examples.ts && tsx scripts/check-read-only.ts",
     "dev:stack": "docker compose -f docker-compose.dev.yml up -d"
   },
   "devDependencies": {
