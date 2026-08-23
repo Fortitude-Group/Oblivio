@@ -116,7 +116,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 - [X] T040 [US1] Build the key-facts panel (release, version, downloads, bus factor, licence, trend, incl. "last updated") (FR-013)
 - [X] T041 [US1] Build the insufficient-data state (reason shown, no numeric score) (FR-007)
 - [X] T042 [US1] Add SEO markup: metadata, canonical (config-driven host), Open Graph/Twitter tags, and JSON-LD (SoftwareSourceCode) via `generateMetadata` on the package route (FR-016). NOTE: OG *image* generation (T034) still pending; tags reference it
-- [ ] T043 [US1] Add chunked XML sitemap covering the universe in `apps/web/app/sitemap` (≤50k URLs/file, FR-016) — PENDING (waits on the universe builder T028)
+- [X] T043 [US1] Add XML sitemap covering the universe in `apps/web/app/sitemap.ts` (home, methodology, lists, ecosystems, and every package; 72 URLs live) plus `app/robots.ts` pointing at it (FR-016). NOTE: single file for now; `generateSitemaps` chunking kicks in past ~50k URLs.
 - [X] T044 [US1] Apply Fortitude/OSPulse house style to the page shell (`apps/web/app/layout.tsx` + `globals.css`: cinematic dark theme, glass panels, animated score ring) (FR-028); also a home showcase grid, `not-found`, and a generated `/methodology` page (partial T046) and a config-driven OSPulse on-ramp (partial US5)
 
 **Checkpoint**: MVP. A searcher can land on a fair, fast, indexed, shareable package page; insufficient-data is honest. Deployable/demoable.
@@ -159,7 +159,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 - [X] T051 [US2] Implement the front page headline finding (abandonment share over the persisted `WorkingUniverse` with an auditable denominator, verdict breakdown, and "as of" date) in `apps/web/app/page.tsx` + `lib/data.ts:getUniverseHeadline` (FR-017, SC-009); verified live showing "2% of 62" with the breakdown
 - [X] T052 [US2] Implement leaderboard route `apps/web/app/lists/[slug]/page.tsx` + a `/lists` index, with each list's inclusion_note (FR-018); verified live (single-maintainer, archived-still-used, etc.)
 - [X] T053 [US2] Define the five leaderboards (at-risk, single-maintainer, declining, archived-still-used, healthiest) code-canonically in `apps/web/lib/leaderboards.ts` (each a predicate + sort + inclusion note; the DB `leaderboards` table stays available for future dynamic definitions)
-- [ ] T054 [P] [US2] Implement ecosystem overview route `apps/web/app/[ecosystem]/page.tsx` with universe size, verdict distribution, and "as-of" (FR-020, FR-013) — PENDING
+- [X] T054 [US2] Implement ecosystem overview route `apps/web/app/[ecosystem]/page.tsx` with per-ecosystem headline share, universe size, verdict distribution, "as-of", and members ranked by dependents (FR-020, FR-013); verified live at `/npm` and `/pypi`. Also implemented package **search** (FR-019): a client typeahead (`apps/web/components/Search.tsx`) on the home page, verified navigating to a package.
 - [X] T055 [US2] Wire OG cards (via the T034 generator) + internal linking for front/list pages (home links to every list; list metadata sets `og:image`) (FR-016/023). NOTE: the XML sitemap (T043) is still pending
 
 **Checkpoint**: The press/social surfaces work and are shareable; US1 + US2 + US3 independently functional.

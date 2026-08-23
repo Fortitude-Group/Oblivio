@@ -1,9 +1,11 @@
 import type { CSSProperties } from "react";
 import type { Verdict } from "@observatory/core";
+import { ECOSYSTEMS } from "@observatory/core";
 import { VERDICT_STYLE } from "../lib/verdict";
 import { fullDate } from "../lib/format";
 import { listScoredPackages, getUniverseHeadline } from "../lib/data";
 import { LEADERBOARDS } from "../lib/leaderboards";
+import { Search } from "../components/Search";
 
 export const revalidate = 3600;
 
@@ -21,6 +23,10 @@ export default async function Home() {
     getUniverseHeadline(),
     listScoredPackages(),
   ]);
+  const searchItems = rows.map(({ pkg }) => ({
+    ecosystem: pkg.ecosystemId,
+    name: pkg.name,
+  }));
 
   return (
     <main className="shell">
@@ -76,6 +82,17 @@ export default async function Home() {
           </p>
         </section>
       )}
+
+      <div className="search-row">
+        <Search items={searchItems} />
+        <div className="eco-links">
+          {ECOSYSTEMS.map((e) => (
+            <a key={e} href={`/${e}`}>
+              {e} health →
+            </a>
+          ))}
+        </div>
+      </div>
 
       <section className="section">
         <div className="section-head">

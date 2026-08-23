@@ -90,6 +90,29 @@ export interface ScoredRow {
   transitiveDependents: number;
 }
 
+/** State-of-one-ecosystem view for the ecosystem overview page (FR-020). */
+export async function getEcosystemView(ecosystem: string) {
+  const db = getDb();
+  const universe = await getLatestUniverse(db, ecosystem);
+  const rows = (await getScoredRows())
+    .filter((r) => r.ecosystem === ecosystem)
+    .sort((a, b) => b.transitiveDependents - a.transitiveDependents);
+  if (rows.length === 0) return null;
+
+  const counts = {} as Record<Verdict, number>;
+  for (const r of rows) counts[r.verdict] = (counts[r.verdict] ?? 0) + 1;
+  const abandoned =
+    (counts.slowing_down ?? 0) + (counts.at_risk ?? 0) + (counts.archived ?? 0);
+  return {
+    ecosystem,
+    size: rows.length,
+    counts,
+    share: abandoned / rows.length,
+    asOf: universe?.builtAt ?? null,
+    rows,
+  };
+}
+
 /** Every scored package, enriched with the fields the leaderboards rank on. */
 export async function getScoredRows(): Promise<ScoredRow[]> {
   const db = getDb();
