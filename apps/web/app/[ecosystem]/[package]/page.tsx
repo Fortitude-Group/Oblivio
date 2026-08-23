@@ -8,6 +8,7 @@ import { VERDICT_STYLE } from "../../../lib/verdict";
 import { compact, fullDate, relativeTime } from "../../../lib/format";
 import { getPackageView } from "../../../lib/data";
 import { TrendChart } from "../../../components/TrendChart";
+import { StatusIcon } from "../../../components/StatusIcon";
 
 export const revalidate = 3600; // ISR: regenerate on the pipeline's cadence.
 
@@ -270,6 +271,7 @@ export default async function PackagePage({
                   <div className="meta">
                     <b>+{contribution.toFixed(1)}</b> / {(s.weight * 100).toFixed(0)}
                   </div>
+                  <StatusIcon subScore={s.subScore} />
                 </div>
               );
             })}
