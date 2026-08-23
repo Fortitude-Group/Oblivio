@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { ThemeToggle } from "../components/ThemeToggle";
 import "./globals.css";
+
+const THEME_INIT = `try{var t=localStorage.getItem('obs-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}`;
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,7 +34,24 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${grotesk.variable}`}>
       <body>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <div className="aurora" aria-hidden />
+        <header className="site-header">
+          <div className="inner">
+            <a href="/" className="brand" aria-label="Oblivio, home">
+              <span className="mark" aria-hidden />
+              <span className="brand-name">
+                Oblivio
+                <small>maintenance health</small>
+              </span>
+            </a>
+            <nav className="header-actions" aria-label="Primary">
+              <a href="/lists">Leaderboards</a>
+              <a href="/api-docs">API</a>
+              <ThemeToggle />
+            </nav>
+          </div>
+        </header>
         {children}
         <footer className="site-footer">
           <span>
