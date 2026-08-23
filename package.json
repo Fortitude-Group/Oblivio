@@ -12,6 +12,7 @@
     "test:fairness": "vitest run fairness",
     "lint": "prettier --check \"packages/**/*.{ts,md,json}\"",
     "format": "prettier --write \"packages/**/*.{ts,md,json}\"",
+    "test:e2e": "pnpm --filter @observatory/web e2e",
     "dev:stack": "docker compose -f docker-compose.dev.yml up -d"
   },
   "devDependencies": {
