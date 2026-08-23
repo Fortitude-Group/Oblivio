@@ -15,6 +15,7 @@ import {
 } from "../src/repos/harm";
 import { transitiveDependentsCounts } from "../src/universe/graph";
 import { parseRequiresDist } from "../src/registries/pypi";
+import { parseNuspec, latestStable } from "../src/registries/nuget";
 
 describe("resolveRepoUrl", () => {
   it.each([
@@ -222,6 +223,24 @@ describe("parseRequiresDist", () => {
         "PySocks (>=1.5.6) ; extra == 'socks'",
       ]),
     ).toEqual(["urllib3", "certifi"]);
+  });
+});
+
+describe("nuget: parseNuspec / latestStable", () => {
+  const xml = `<?xml version="1.0"?><package><metadata><id>Serilog</id><version>3.1.1</version><projectUrl>https://serilog.net</projectUrl><license type="expression">Apache-2.0</license><repository type="git" url="https://github.com/serilog/serilog" /><dependencies><group targetFramework="net6.0"><dependency id="System.Text.Json" version="6.0.0" /></group></dependencies></metadata></package>`;
+
+  it("parses repository, licence and dependencies from a nuspec", () => {
+    const info = parseNuspec(xml);
+    expect(info.repoUrl).toBe("https://github.com/serilog/serilog");
+    expect(info.projectUrl).toBe("https://serilog.net");
+    expect(info.license).toBe("Apache-2.0");
+    expect(info.dependencies).toContain("System.Text.Json");
+  });
+
+  it("latestStable prefers the last non-prerelease version", () => {
+    expect(latestStable(["1.0.0", "2.0.0", "3.0.0-beta"])).toBe("2.0.0");
+    expect(latestStable(["1.0.0-a", "2.0.0-b"])).toBe("2.0.0-b");
+    expect(latestStable([])).toBeNull();
   });
 });
 

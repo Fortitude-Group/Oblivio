@@ -15,10 +15,16 @@ export const revalidate = 3600; // ISR: regenerate on the pipeline's cadence.
 type Params = { ecosystem: string; package: string };
 
 function registryUrl(ecosystem: string, name: string): string {
-  return ecosystem === "npm"
-    ? `https://www.npmjs.com/package/${name}`
-    : `https://pypi.org/project/${name}/`;
+  if (ecosystem === "npm") return `https://www.npmjs.com/package/${name}`;
+  if (ecosystem === "nuget") return `https://www.nuget.org/packages/${name}`;
+  return `https://pypi.org/project/${name}/`;
 }
+
+const LANGUAGE: Record<string, string> = {
+  npm: "JavaScript",
+  pypi: "Python",
+  nuget: "C#",
+};
 
 export async function generateMetadata({
   params,
@@ -105,7 +111,7 @@ export default async function PackagePage({
     "@type": "SoftwareSourceCode",
     name,
     codeRepository: pkg.declaredRepoUrl ?? undefined,
-    programmingLanguage: ecosystem === "npm" ? "JavaScript" : "Python",
+    programmingLanguage: LANGUAGE[ecosystem] ?? "Unknown",
     description: style.tagline,
     license: pkg.declaredLicense ?? undefined,
   };
@@ -212,7 +218,9 @@ export default async function PackagePage({
           <div className="stat">
             <div className="label">Downloads</div>
             <div className="value">{compact(pkg.downloadCount)}</div>
-            <div className="sub">last month</div>
+            <div className="sub">
+              {ecosystem === "nuget" ? "all time" : "last month"}
+            </div>
           </div>
           <div className="stat">
             <div className="label">Bus factor</div>

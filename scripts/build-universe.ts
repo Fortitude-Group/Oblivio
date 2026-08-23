@@ -40,6 +40,16 @@ const SEED: Record<Ecosystem, string[]> = {
     "click", "jinja2", "werkzeug", "numpy", "pandas", "pydantic", "boto3",
     "setuptools", "six", "python-dateutil", "pyyaml", "packaging",
   ],
+  nuget: [
+    "Newtonsoft.Json", "Serilog", "Serilog.AspNetCore", "Serilog.Sinks.Console",
+    "Polly", "AutoMapper", "Dapper", "Moq", "xunit", "FluentAssertions",
+    "FluentValidation", "MediatR", "Castle.Core", "Humanizer", "CsvHelper",
+    "RestSharp", "Swashbuckle.AspNetCore", "Azure.Core",
+    "Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.Abstractions",
+    "Microsoft.Extensions.DependencyInjection",
+    "Microsoft.Extensions.DependencyInjection.Abstractions",
+    "Microsoft.Extensions.Configuration", "Microsoft.Extensions.Http",
+  ],
 };
 
 const ecosystem = ((process.argv[2] as Ecosystem) || "npm") as Ecosystem;

@@ -23,8 +23,8 @@ export type Confidence = "high" | "medium" | "insufficient_data";
 /** Direction of a package's health over time (set from history, not the rubric). */
 export type TrendDirection = "improving" | "stable" | "declining";
 
-/** Ecosystems covered in the initial build (spec: npm + PyPI first). */
-export const ECOSYSTEMS = ["npm", "pypi"] as const;
+/** Ecosystems covered: npm, PyPI, and NuGet (.NET). */
+export const ECOSYSTEMS = ["npm", "pypi", "nuget"] as const;
 
 export type Ecosystem = (typeof ECOSYSTEMS)[number];
 

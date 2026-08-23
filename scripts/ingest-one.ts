@@ -27,8 +27,11 @@ import { scoreAndPersist } from "@observatory/pipeline";
 import type { Ecosystem } from "@observatory/core";
 
 const [, , ecoArg, name] = process.argv;
-if ((ecoArg !== "npm" && ecoArg !== "pypi") || !name) {
-  console.error("Usage: tsx scripts/ingest-one.ts <npm|pypi> <package-name>");
+if (
+  (ecoArg !== "npm" && ecoArg !== "pypi" && ecoArg !== "nuget") ||
+  !name
+) {
+  console.error("Usage: tsx scripts/ingest-one.ts <npm|pypi|nuget> <package-name>");
   process.exit(2);
 }
 const ecosystem = ecoArg as Ecosystem;

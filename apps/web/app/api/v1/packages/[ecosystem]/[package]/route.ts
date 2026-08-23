@@ -6,9 +6,9 @@ import { getPackageView } from "@web/lib/data";
 export const runtime = "nodejs";
 
 function registryUrl(ecosystem: string, name: string): string {
-  return ecosystem === "npm"
-    ? `https://www.npmjs.com/package/${name}`
-    : `https://pypi.org/project/${name}/`;
+  if (ecosystem === "npm") return `https://www.npmjs.com/package/${name}`;
+  if (ecosystem === "nuget") return `https://www.nuget.org/packages/${name}`;
+  return `https://pypi.org/project/${name}/`;
 }
 
 export async function GET(
