@@ -105,19 +105,19 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Tests for User Story 1
 
-- [ ] T035 [P] [US1] E2E test of the package page (verdict + signals + facts + links + last-updated, and insufficient-data path) in `apps/web/tests/e2e/package-page.spec.ts`
-- [ ] T036 [P] [US1] CWV assertion test (LCP/INP/CLS thresholds) for `/npm/lodash` in `apps/web/tests/cwv/package-page.cwv.ts` (SC-007)
+- [ ] T035 [P] [US1] E2E test of the package page (verdict + signals + facts + links + last-updated, and insufficient-data path) in `apps/web/tests/e2e/package-page.spec.ts` — PENDING (page verified live via screenshot; Playwright suite not yet written)
+- [ ] T036 [P] [US1] CWV assertion test (LCP/INP/CLS thresholds) for `/npm/lodash` in `apps/web/tests/cwv/package-page.cwv.ts` (SC-007) — PENDING
 
 ### Implementation for User Story 1
 
-- [ ] T037 [US1] Implement the per-package ISR route `apps/web/app/(site)/[ecosystem]/[package]/page.tsx` reading current score + facts via `packages/db` (research item 1; the T033 revalidation hook targets this route)
-- [ ] T038 [P] [US1] Build the verdict + signal-breakdown component (every number traces to a signal, Principle XII) in `apps/web/components/SignalBreakdown.tsx`
-- [ ] T039 [P] [US1] Build the trend chart from `ScoreDaily` in `apps/web/components/TrendChart.tsx` (FR-011)
-- [ ] T040 [P] [US1] Build the key-facts panel (incl. "last updated") + repo/registry/methodology links in `apps/web/components/KeyFacts.tsx` (FR-013)
-- [ ] T041 [P] [US1] Build the insufficient-data state (reason shown, no numeric score) in `apps/web/components/InsufficientData.tsx` (FR-007)
-- [ ] T042 [US1] Add SEO markup: metadata, canonical (config-driven host), Open Graph/Twitter tags pointing at the T034 OG generator, and JSON-LD to the package route in `apps/web/app/(site)/[ecosystem]/[package]/head.tsx` (FR-016)
-- [ ] T043 [US1] Add chunked XML sitemap covering the universe in `apps/web/app/sitemap/route.ts` (≤50k URLs/file, FR-016)
-- [ ] T044 [US1] Apply Fortitude/OSPulse house style tokens to the page shell in `apps/web/app/(site)/layout.tsx` (FR-028)
+- [X] T037 [US1] Implement the per-package ISR route `apps/web/app/[ecosystem]/[package]/page.tsx` (revalidate=3600) reading current score + facts via `packages/db` (research item 1); verified live rendering real DB scores
+- [X] T038 [US1] Build the verdict + signal-breakdown (every number traces to a signal with per-signal contribution points, Principle XII) — rendered in the package route with colour-coded bars
+- [ ] T039 [US1] Build the trend chart from `ScoreDaily` (FR-011) — PARTIAL: trend shown as a direction chip; a real chart waits until history has more than one snapshot per package
+- [X] T040 [US1] Build the key-facts panel (release, version, downloads, bus factor, licence, trend, incl. "last updated") (FR-013)
+- [X] T041 [US1] Build the insufficient-data state (reason shown, no numeric score) (FR-007)
+- [X] T042 [US1] Add SEO markup: metadata, canonical (config-driven host), Open Graph/Twitter tags, and JSON-LD (SoftwareSourceCode) via `generateMetadata` on the package route (FR-016). NOTE: OG *image* generation (T034) still pending; tags reference it
+- [ ] T043 [US1] Add chunked XML sitemap covering the universe in `apps/web/app/sitemap` (≤50k URLs/file, FR-016) — PENDING (waits on the universe builder T028)
+- [X] T044 [US1] Apply Fortitude/OSPulse house style to the page shell (`apps/web/app/layout.tsx` + `globals.css`: cinematic dark theme, glass panels, animated score ring) (FR-028); also a home showcase grid, `not-found`, and a generated `/methodology` page (partial T046) and a config-driven OSPulse on-ramp (partial US5)
 
 **Checkpoint**: MVP. A searcher can land on a fair, fast, indexed, shareable package page; insufficient-data is honest. Deployable/demoable.
 
