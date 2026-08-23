@@ -10,6 +10,9 @@ import { snapshotInputSchema, type SnapshotInput } from "../validation";
  */
 export async function insertSnapshot(db: Database, input: SnapshotInput) {
   const v = snapshotInputSchema.parse(input);
+  // Guarantee the monthly partition for this snapshot exists (idempotent).
+  const day = v.computedAt.toISOString().slice(0, 10);
+  await db.execute(sql`select ensure_month_partition(${day}::date)`);
   const [out] = await db
     .insert(scoreSnapshots)
     .values({

@@ -4,39 +4,51 @@ import { ECOSYSTEMS } from "@observatory/core";
 import { getScoredRows } from "../lib/data";
 import { LEADERBOARDS } from "../lib/leaderboards";
 
-/**
- * XML sitemap covering the whole universe (FR-016). One file is ample at the
- * current scale; at ~50k+ URLs this becomes a sitemap index with chunked
- * children, which Next supports via generateSitemaps.
- */
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const cfg = loadConfig();
-  const base = cfg.baseUrl;
+// Sitemaps cap at 50k URLs each, so chunk the package pages. At the current
+// scale this is a single chunk; it grows to a sitemap index automatically as the
+// universe reaches tens of thousands of packages (FR-016).
+const CHUNK = 45000;
+
+export async function generateSitemaps() {
+  const rows = await getScoredRows();
+  const chunks = Math.max(1, Math.ceil(rows.length / CHUNK));
+  return Array.from({ length: chunks }, (_, id) => ({ id }));
+}
+
+export default async function sitemap({
+  id,
+}: {
+  id: number;
+}): Promise<MetadataRoute.Sitemap> {
+  const base = loadConfig().baseUrl;
   const rows = await getScoredRows();
 
+  const packageRoutes: MetadataRoute.Sitemap = rows
+    .slice(id * CHUNK, (id + 1) * CHUNK)
+    .map((r) => ({
+      url: `${base}/${r.ecosystem}/${r.name}`,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
+
+  if (id !== 0) return packageRoutes;
+
+  // The first chunk also carries the fixed routes.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base, changeFrequency: "daily", priority: 1 },
     { url: `${base}/methodology`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/lists`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/api-docs`, changeFrequency: "monthly", priority: 0.5 },
+    ...ECOSYSTEMS.map((e) => ({
+      url: `${base}/${e}`,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    })),
+    ...LEADERBOARDS.map((l) => ({
+      url: `${base}/lists/${l.slug}`,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    })),
   ];
-
-  const ecosystemRoutes: MetadataRoute.Sitemap = ECOSYSTEMS.map((e) => ({
-    url: `${base}/${e}`,
-    changeFrequency: "daily",
-    priority: 0.8,
-  }));
-
-  const listRoutes: MetadataRoute.Sitemap = LEADERBOARDS.map((l) => ({
-    url: `${base}/lists/${l.slug}`,
-    changeFrequency: "daily",
-    priority: 0.7,
-  }));
-
-  const packageRoutes: MetadataRoute.Sitemap = rows.map((r) => ({
-    url: `${base}/${r.ecosystem}/${r.name}`,
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }));
-
-  return [...staticRoutes, ...ecosystemRoutes, ...listRoutes, ...packageRoutes];
+  return [...staticRoutes, ...packageRoutes];
 }

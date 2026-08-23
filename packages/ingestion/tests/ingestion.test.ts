@@ -16,6 +16,7 @@ import {
 import { transitiveDependentsCounts } from "../src/universe/graph";
 import { parseRequiresDist } from "../src/registries/pypi";
 import { parseNuspec, latestStable } from "../src/registries/nuget";
+import { fetchMostDependedOn } from "../src/universe/source";
 
 describe("resolveRepoUrl", () => {
   it.each([
@@ -241,6 +242,40 @@ describe("nuget: parseNuspec / latestStable", () => {
     expect(latestStable(["1.0.0", "2.0.0", "3.0.0-beta"])).toBe("2.0.0");
     expect(latestStable(["1.0.0-a", "2.0.0-b"])).toBe("2.0.0-b");
     expect(latestStable([])).toBeNull();
+  });
+});
+
+describe("fetchMostDependedOn (universe source)", () => {
+  it("returns ranked names and stops when a page is empty", async () => {
+    const fakeFetch = (async (url: string) => {
+      const page = Number(new URL(url).searchParams.get("page"));
+      const body =
+        page === 1
+          ? [
+              { name: "a", dependent_packages_count: 100 },
+              { name: "b", dependent_packages_count: 90 },
+            ]
+          : [];
+      return { ok: true, json: async () => body } as Response;
+    }) as unknown as typeof fetch;
+
+    const top = await fetchMostDependedOn("npm", 500, fakeFetch);
+    expect(top.map((t) => t.name)).toEqual(["a", "b"]);
+    expect(top[0]!.dependentCount).toBe(100);
+  });
+
+  it("respects the requested size", async () => {
+    const fakeFetch = (async () =>
+      ({
+        ok: true,
+        json: async () =>
+          Array.from({ length: 100 }, (_, i) => ({
+            name: `p${i}`,
+            dependent_packages_count: 100 - i,
+          })),
+      }) as Response) as unknown as typeof fetch;
+    const top = await fetchMostDependedOn("pypi", 5, fakeFetch);
+    expect(top).toHaveLength(5);
   });
 });
 

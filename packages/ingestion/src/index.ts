@@ -41,3 +41,4 @@ export {
   type UniverseBuildResult,
 } from "./universe/build";
 export { transitiveDependentsCounts, type Edge } from "./universe/graph";
+export { fetchMostDependedOn, type TopPackage } from "./universe/source";

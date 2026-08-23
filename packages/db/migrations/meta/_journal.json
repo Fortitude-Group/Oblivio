@@ -15,6 +15,13 @@
       "when": 1787436022158,
       "tag": "0001_append_only_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787525901670,
+      "tag": "0002_partition_scores",
+      "breakpoints": true
     }
   ]
 }
