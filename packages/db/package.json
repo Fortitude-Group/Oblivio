@@ -1,0 +1,23 @@
+{
+  "name": "@observatory/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/migrate.ts"
+  },
+  "dependencies": {
+    "@observatory/core": "workspace:*",
+    "@observatory/scoring-engine": "workspace:*",
+    "drizzle-orm": "^0.36.4",
+    "postgres": "^3.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.28.1",
+    "tsx": "^4.19.2"
+  }
+}

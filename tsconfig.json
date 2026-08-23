@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "paths": {
+      "@observatory/core": ["packages/core/src/index.ts"],
+      "@observatory/config": ["packages/config/src/index.ts"],
+      "@observatory/scoring-engine": ["packages/scoring-engine/src/index.ts"],
+      "@observatory/db": ["packages/db/src/index.ts"],
+      "@observatory/ingestion": ["packages/ingestion/src/index.ts"],
+      "@observatory/pipeline": ["services/pipeline/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/core/src",
+    "packages/config/src",
+    "packages/scoring-engine/src",
+    "packages/scoring-engine/tests",
+    "packages/db/src",
+    "packages/db/tests",
+    "packages/ingestion/src",
+    "packages/ingestion/tests",
+    "services/pipeline/src",
+    "services/pipeline/tests",
+    "scripts"
+  ]
+}

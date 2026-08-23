@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: observatory
+      POSTGRES_PASSWORD: observatory
+      POSTGRES_DB: observatory
+    ports:
+      # Host 5433 to avoid clashing with any Postgres already on 5432.
+      - "5433:5432"
+    volumes:
+      - observatory_pg:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+    ports:
+      # Host 6380 to avoid clashing with any Redis already on 6379.
+      - "6380:6379"
+
+volumes:
+  observatory_pg:

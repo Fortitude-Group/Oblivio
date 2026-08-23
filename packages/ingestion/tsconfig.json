@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@observatory/core": ["packages/core/src/index.ts"],
+      "@observatory/scoring-engine": ["packages/scoring-engine/src/index.ts"]
+    }
+  },
+  "include": ["src", "tests"]
+}
