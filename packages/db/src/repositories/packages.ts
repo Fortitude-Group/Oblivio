@@ -72,6 +72,21 @@ export async function upsertPackage(db: Database, input: PackageUpsert) {
   return out!;
 }
 
+/** Mark a package as a member of the current working universe (FR-003). */
+export async function setUniverseMembership(
+  db: Database,
+  input: { packageId: string; rank: number; transitiveDependents: number },
+) {
+  await db
+    .update(packages)
+    .set({
+      inUniverse: true,
+      universeRank: input.rank,
+      transitiveDependentsCount: input.transitiveDependents,
+    })
+    .where(eq(packages.id, input.packageId));
+}
+
 export async function getPackage(
   db: Database,
   ecosystemId: string,

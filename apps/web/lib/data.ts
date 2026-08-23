@@ -2,8 +2,10 @@ import {
   getPackage,
   getLatestScore,
   getDailyHistory,
+  getLatestUniverse,
   schema,
 } from "@observatory/db";
+import { ECOSYSTEMS, type Verdict } from "@observatory/core";
 import { getDb } from "./db";
 
 export async function getPackageView(ecosystem: string, name: string) {
@@ -20,6 +22,45 @@ export async function getPackageView(ecosystem: string, name: string) {
 export type PackageView = NonNullable<
   Awaited<ReturnType<typeof getPackageView>>
 >;
+
+/**
+ * The headline finding over the persisted working universe: what share of the
+ * most-depended-on packages show abandonment signals (FR-017). Computed over the
+ * latest universe snapshot per ecosystem so the denominator is auditable.
+ */
+export async function getUniverseHeadline() {
+  const db = getDb();
+  const universes = (
+    await Promise.all(ECOSYSTEMS.map((e) => getLatestUniverse(db, e)))
+  ).filter((u): u is NonNullable<typeof u> => u !== null);
+  const members = universes.flatMap((u) => u.members);
+  if (members.length === 0) return null;
+
+  const snaps = await Promise.all(
+    members.map((m) => getLatestScore(db, m.packageId)),
+  );
+  const counts = {} as Record<Verdict, number>;
+  let size = 0;
+  for (const s of snaps) {
+    if (!s) continue;
+    size += 1;
+    counts[s.verdict as Verdict] = (counts[s.verdict as Verdict] ?? 0) + 1;
+  }
+  const abandoned =
+    (counts.slowing_down ?? 0) + (counts.at_risk ?? 0) + (counts.archived ?? 0);
+  const asOf =
+    universes
+      .map((u) => u.builtAt)
+      .sort()
+      .at(-1) ?? null;
+  return {
+    size,
+    abandoned,
+    share: size > 0 ? abandoned / size : 0,
+    counts,
+    asOf,
+  };
+}
 
 /** All scored packages, newest score first — powers the showcase grid. */
 export async function listScoredPackages() {

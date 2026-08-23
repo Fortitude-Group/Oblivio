@@ -34,3 +34,10 @@ export type {
   RepoAccessState,
 } from "./repos/types";
 export { buildScoringInputs } from "./assemble";
+export {
+  buildUniverse,
+  CRITERIA_VERSION,
+  type UniverseMemberBuild,
+  type UniverseBuildResult,
+} from "./universe/build";
+export { transitiveDependentsCounts, type Edge } from "./universe/graph";

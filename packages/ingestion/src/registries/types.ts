@@ -11,6 +11,8 @@ export interface RegistryPackage {
   declaredRepoUrl: string | null;
   declaredLicense: string | null;
   isDeprecated: boolean;
+  /** Direct runtime dependency names (for building the dependency graph). */
+  dependencies: string[];
 }
 
 export type FetchFn = typeof fetch;

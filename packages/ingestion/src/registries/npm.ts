@@ -2,7 +2,14 @@ import type { RegistryAdapter, RegistryPackage, FetchFn } from "./types";
 
 interface NpmDoc {
   "dist-tags"?: { latest?: string };
-  versions?: Record<string, { deprecated?: string; license?: string }>;
+  versions?: Record<
+    string,
+    {
+      deprecated?: string;
+      license?: string;
+      dependencies?: Record<string, string>;
+    }
+  >;
   time?: Record<string, string>;
   repository?: { url?: string } | string;
   license?: string | { type?: string };
@@ -28,6 +35,9 @@ export function mapNpm(
   const license =
     typeof doc.license === "string" ? doc.license : (doc.license?.type ?? null);
   const latestVer = latest ?? undefined;
+  const dependencies = latestVer
+    ? Object.keys(doc.versions?.[latestVer]?.dependencies ?? {})
+    : [];
   return {
     ecosystem: "npm",
     name,
@@ -40,6 +50,7 @@ export function mapNpm(
     isDeprecated: latestVer
       ? Boolean(doc.versions?.[latestVer]?.deprecated)
       : false,
+    dependencies,
   };
 }
 

@@ -76,7 +76,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 - [X] T025 [P] Implement PyPI registry adapter (JSON API + pypistats downloads) in `packages/ingestion/src/registries/pypi.ts` (verified live: pypi/requests → actively_maintained)
 - [X] T026 [P] Define repo-host interface + GitHub App adapter (App-JWT → installation token, commits/releases/contributors/open-PR count, archived override) in `packages/ingestion/src/repos/{types.ts,github.ts}` + `packages/ingestion/src/github/auth.ts` (verified live: 5k req/hr, lodash/react/request incl. archived detection). Conservative harm mining added in `packages/ingestion/src/repos/harm.ts` (looking-for-maintainer from description/topics/disabled; unanswered security issues) — verified live to fire (gulp-util) without false-positiving healthy packages (lodash), protecting Gate A. NOTE still pending: issue/PR latency signals, ETag conditional-request caching, and the noisier harm signals (dependent-breakage, neglected-PR judgement, semver stagnation) which need dependent-graph/triage data to stay fairness-safe
 - [X] T027 [P] Implement GitLab REST adapter (public projects; optional token) in `packages/ingestion/src/repos/gitlab.ts` (parity with GitHub; less exercised)
-- [ ] T028 Implement the universe builder: build per-ecosystem dependency graph, compute transitive dependents, rank (downloads tiebreak), persist a reproducible `WorkingUniverse` snapshot in `packages/ingestion/src/universe/build.ts` (FR-003, research item 4). NOT STARTED — the transitive-dependents graph is a separate data problem; single-package ingest+score+persist works end to end via `scripts/ingest-one.ts`
+- [X] T028 Implement the universe builder: build per-ecosystem dependency graph, compute transitive dependents (reverse reachability, `packages/ingestion/src/universe/graph.ts` + `build.ts`), rank (downloads tiebreak), persist a reproducible `WorkingUniverse` snapshot (FR-003, research item 4). Verified live: `scripts/build-universe.ts` built and scored 44 npm + 18 PyPI members, persisted the snapshots, and marked membership/ranks. Seed is the current working set (bounded); scaling toward the full registry is a data-pipeline concern, not an algorithm change
 
 ### Fairness gate (Gate A / SC-001) — blocking
 
@@ -156,7 +156,7 @@ description: "Task list for The Observatory — abandoned-package health observa
 
 ### Implementation for User Story 2
 
-- [ ] T051 [US2] Implement the front page (headline at-risk share over `WorkingUniverse`, by-ecosystem, "as of") in `apps/web/app/(site)/page.tsx` (FR-017, SC-009)
+- [X] T051 [US2] Implement the front page headline finding (abandonment share over the persisted `WorkingUniverse` with an auditable denominator, verdict breakdown, and "as of" date) in `apps/web/app/page.tsx` + `lib/data.ts:getUniverseHeadline` (FR-017, SC-009); verified live showing "2% of 62" with the breakdown
 - [ ] T052 [P] [US2] Implement leaderboard route `apps/web/app/(site)/lists/[slug]/page.tsx` with query definitions, inclusion_note, and "last updated / as-of" (FR-018, FR-013)
 - [ ] T053 [P] [US2] Seed the five leaderboard definitions (most-depended-on-at-risk, single-maintainer, recently-declining, recently-archived-still-used, healthiest-large) in `packages/db/src/seed/leaderboards.ts`
 - [ ] T054 [P] [US2] Implement ecosystem overview route `apps/web/app/(site)/[ecosystem]/page.tsx` with universe size, verdict distribution, and "last updated / as-of" (FR-020, FR-013)

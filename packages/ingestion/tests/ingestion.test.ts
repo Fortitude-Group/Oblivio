@@ -13,6 +13,8 @@ import {
   countUnansweredSecurity,
   mineHarm,
 } from "../src/repos/harm";
+import { transitiveDependentsCounts } from "../src/universe/graph";
+import { parseRequiresDist } from "../src/registries/pypi";
 
 describe("resolveRepoUrl", () => {
   it.each([
@@ -183,6 +185,46 @@ describe("harm mining (conservative)", () => {
   });
 });
 
+describe("universe: transitiveDependentsCounts", () => {
+  it("counts direct and indirect dependents (reverse reachability)", () => {
+    // a depends on b, b depends on c, d depends on b.
+    const nodes = ["a", "b", "c", "d"];
+    const edges = [
+      { from: "a", to: "b" },
+      { from: "b", to: "c" },
+      { from: "d", to: "b" },
+    ];
+    const counts = transitiveDependentsCounts(nodes, edges);
+    expect(counts.get("c")).toBe(3); // b, a, d
+    expect(counts.get("b")).toBe(2); // a, d
+    expect(counts.get("a")).toBe(0);
+  });
+
+  it("handles cycles without looping forever", () => {
+    const counts = transitiveDependentsCounts(
+      ["x", "y"],
+      [
+        { from: "x", to: "y" },
+        { from: "y", to: "x" },
+      ],
+    );
+    expect(counts.get("x")).toBe(1);
+    expect(counts.get("y")).toBe(1);
+  });
+});
+
+describe("parseRequiresDist", () => {
+  it("extracts names and skips optional extras", () => {
+    expect(
+      parseRequiresDist([
+        "urllib3 (>=1.21.1,<3)",
+        "certifi (>=2017.4.17)",
+        "PySocks (>=1.5.6) ; extra == 'socks'",
+      ]),
+    ).toEqual(["urllib3", "certifi"]);
+  });
+});
+
 describe("buildScoringInputs", () => {
   it("combines registry + repo and defaults harm to none", () => {
     const inputs = buildScoringInputs(
@@ -196,6 +238,7 @@ describe("buildScoringInputs", () => {
         declaredRepoUrl: "https://github.com/lodash/lodash",
         declaredLicense: "MIT",
         isDeprecated: false,
+        dependencies: [],
       },
       null,
       "2026-08-23T00:00:00Z",

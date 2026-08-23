@@ -540,6 +540,58 @@ a {
   text-align: center;
 }
 
+/* ---- headline finding ---- */
+.headline {
+  text-align: center;
+  padding: 30px 0 10px;
+}
+.headline .big {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(64px, 13vw, 138px);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  background: linear-gradient(120deg, #ffffff 30%, #7c5cff 80%, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 10px 40px rgba(124, 92, 255, 0.25));
+}
+.headline .cap {
+  color: var(--text-dim);
+  font-size: 17px;
+  max-width: 56ch;
+  margin: 18px auto 0;
+}
+.breakdown {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.chip .led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.chip b {
+  color: var(--text);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 600;
+}
+
 /* ---- home grid ---- */
 .home-hero {
   text-align: center;

@@ -1,12 +1,25 @@
 import type { CSSProperties } from "react";
 import type { Verdict } from "@observatory/core";
 import { VERDICT_STYLE } from "../lib/verdict";
-import { listScoredPackages } from "../lib/data";
+import { fullDate } from "../lib/format";
+import { listScoredPackages, getUniverseHeadline } from "../lib/data";
 
 export const revalidate = 3600;
 
+const BREAKDOWN_ORDER: Verdict[] = [
+  "actively_maintained",
+  "stable_low_activity",
+  "slowing_down",
+  "at_risk",
+  "archived",
+  "insufficient_data",
+];
+
 export default async function Home() {
-  const rows = await listScoredPackages();
+  const [headline, rows] = await Promise.all([
+    getUniverseHeadline(),
+    listScoredPackages(),
+  ]);
 
   return (
     <main className="shell">
@@ -24,18 +37,44 @@ export default async function Home() {
         </div>
       </header>
 
-      <section className="home-hero">
-        <h1>
-          Is that dependency
-          <br />
-          still maintained?
-        </h1>
-        <p>
-          A free, honest health check for the open-source packages the world
-          depends on. Fair, sourced, and reproducible, so quiet does not get
-          mistaken for abandoned.
-        </p>
-      </section>
+      {headline ? (
+        <section className="headline">
+          <div className="big">{Math.round(headline.share * 100)}%</div>
+          <p className="cap">
+            of the {headline.size} most-depended-on packages we track show
+            abandonment signals: slowing down, at risk, or archived. As of{" "}
+            {fullDate(headline.asOf)}.
+          </p>
+          <div className="breakdown">
+            {BREAKDOWN_ORDER.map((v) => {
+              const n = headline.counts[v] ?? 0;
+              if (n === 0) return null;
+              const style = VERDICT_STYLE[v];
+              return (
+                <span className="chip" key={v}>
+                  <span
+                    className="led"
+                    style={{ background: style.accent }}
+                  />
+                  <b>{n}</b> {style.label.toLowerCase()}
+                </span>
+              );
+            })}
+          </div>
+        </section>
+      ) : (
+        <section className="home-hero">
+          <h1>
+            Is that dependency
+            <br />
+            still maintained?
+          </h1>
+          <p>
+            A free, honest health check for the open-source packages the world
+            depends on.
+          </p>
+        </section>
+      )}
 
       <section className="section">
         <div className="section-head">

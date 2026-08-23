@@ -6,8 +6,21 @@ interface PypiDoc {
     home_page?: string;
     project_urls?: Record<string, string> | null;
     license?: string;
+    requires_dist?: string[] | null;
   };
   releases?: Record<string, Array<{ upload_time_iso_8601?: string }>>;
+}
+
+/** Parse dependency names from PyPI requires_dist, skipping optional extras. */
+export function parseRequiresDist(reqs: string[] | null | undefined): string[] {
+  if (!reqs) return [];
+  const names = new Set<string>();
+  for (const entry of reqs) {
+    if (/;\s*extra\s*==/.test(entry)) continue; // optional extra
+    const m = /^([A-Za-z0-9._-]+)/.exec(entry.trim());
+    if (m) names.add(m[1]!.toLowerCase());
+  }
+  return [...names];
 }
 
 /** Pick the most repo-like URL from PyPI's project_urls / home_page. */
@@ -52,6 +65,7 @@ export function mapPypi(
     declaredRepoUrl: pickRepoUrl(doc.info),
     declaredLicense: doc.info?.license ?? null,
     isDeprecated: false, // PyPI has no package-level deprecation flag
+    dependencies: parseRequiresDist(doc.info?.requires_dist),
   };
 }
 
