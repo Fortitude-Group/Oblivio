@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { loadConfig } from "@observatory/config";
 import { getScoredRows } from "../../../../lib/data";
 import { getLeaderboard } from "../../../../lib/leaderboards";
 import { VERDICT_STYLE } from "../../../../lib/verdict";
@@ -78,7 +79,7 @@ export async function GET(
         </div>
 
         <div style={{ display: "flex", fontSize: 26, color: FAINT }}>
-          observatory.fortitude-omnis.group
+          {loadConfig().baseUrl.replace(/^https?:\/\//, "")}
         </div>
       </div>
     ),

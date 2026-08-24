@@ -1,5 +1,9 @@
-export const ATTRIBUTION =
-  "Data: The Observatory (Fortitude Omnis). https://observatory.fortitude-omnis.group";
+import { loadConfig } from "@observatory/config";
+
+/** Mandatory apex attribution (FR-024), pointing at the deployed base URL. */
+export function attribution(): string {
+  return `Data: The Observatory (Fortitude Omnis). ${loadConfig().baseUrl}`;
+}
 
 const CORS = { "access-control-allow-origin": "*" };
 
@@ -9,7 +13,7 @@ export function apiJson(
   init: { status?: number; cacheSeconds?: number } = {},
 ): Response {
   const cache = init.cacheSeconds ?? 300;
-  return new Response(JSON.stringify({ ...data, attribution: ATTRIBUTION }), {
+  return new Response(JSON.stringify({ ...data, attribution: attribution() }), {
     status: init.status ?? 200,
     headers: {
       "content-type": "application/json; charset=utf-8",
@@ -48,7 +52,7 @@ export function rateLimit(req: Request): { ok: boolean; retryAfter: number } {
 
 export function tooMany(retryAfter: number): Response {
   return new Response(
-    JSON.stringify({ error: "rate_limited", retry_after: retryAfter, attribution: ATTRIBUTION }),
+    JSON.stringify({ error: "rate_limited", retry_after: retryAfter, attribution: attribution() }),
     {
       status: 429,
       headers: {
