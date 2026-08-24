@@ -1,0 +1,71 @@
+name: refresh
+
+# Scheduled score refresh for The Observatory. Runs on GitHub's free hosted
+# runners in place of an always-on worker: each run syncs universe membership
+# from ecosyste.ms and scores the stalest packages against Neon, then the pages
+# revalidate. No Redis, no server.
+#
+# Secrets (Settings -> Secrets and variables -> Actions). GitHub forbids secret
+# names beginning with GITHUB_, so the App credentials drop that prefix here and
+# are mapped back to the names the code expects in the env block below:
+#   DATABASE_URL             Neon direct connection string (migrations run DDL)
+#   APP_ID                   GitHub App id            -> GITHUB_APP_ID
+#   APP_INSTALLATION_ID      GitHub App installation  -> GITHUB_APP_INSTALLATION_ID
+#   APP_PRIVATE_KEY_BASE64   base64 of the App .pem   -> GITHUB_APP_PRIVATE_KEY_BASE64
+#   WEB_BASE_URL             the deployed site
+#   REVALIDATE_TOKEN         shared token, matches the site's env
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      universe_size:
+        description: Universe size per ecosystem
+        default: "1000"
+      batch_size:
+        description: Packages to score this run
+        default: "400"
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      UNIVERSE_SIZE: ${{ github.event.inputs.universe_size || '1000' }}
+      BATCH_SIZE: ${{ github.event.inputs.batch_size || '400' }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      GITHUB_APP_ID: ${{ secrets.APP_ID }}
+      GITHUB_APP_INSTALLATION_ID: ${{ secrets.APP_INSTALLATION_ID }}
+      GITHUB_APP_PRIVATE_KEY_BASE64: ${{ secrets.APP_PRIVATE_KEY_BASE64 }}
+      WEB_BASE_URL: ${{ secrets.WEB_BASE_URL }}
+      REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        name: Install
+
+      - run: pnpm --filter @observatory/db db:migrate
+        name: Migrate (idempotent)
+
+      - name: Sync universe membership (ecosyste.ms)
+        run: |
+          pnpm exec tsx scripts/sync-universe.ts npm "$UNIVERSE_SIZE"
+          pnpm exec tsx scripts/sync-universe.ts pypi "$UNIVERSE_SIZE"
+          pnpm exec tsx scripts/sync-universe.ts nuget "$UNIVERSE_SIZE"
+
+      - name: Score the stalest packages
+        run: pnpm exec tsx scripts/score-batch.ts "$BATCH_SIZE"
