@@ -9,6 +9,12 @@ import { LEADERBOARDS } from "../lib/leaderboards";
 // universe reaches tens of thousands of packages (FR-016).
 const CHUNK = 45000;
 
+// Generated at request time, not at build. The sitemap reads the whole scored
+// universe; prerendering every chunk during the build makes them contend for the
+// single serverless DB connection and time out. At runtime each request gets its
+// own connection and the query is cheap.
+export const dynamic = "force-dynamic";
+
 export async function generateSitemaps() {
   const rows = await getScoredRows();
   const chunks = Math.max(1, Math.ceil(rows.length / CHUNK));

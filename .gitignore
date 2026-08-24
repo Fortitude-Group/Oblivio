@@ -35,3 +35,6 @@ Thumbs.db
 
 # Tooling caches
 .code-review-graph/
+
+.vercel
+.env*

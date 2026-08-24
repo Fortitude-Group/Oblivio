@@ -3,6 +3,7 @@ import {
   getLatestScore,
   getDailyHistory,
   getLatestUniverse,
+  listLatestScores,
   schema,
 } from "@observatory/db";
 import {
@@ -34,18 +35,20 @@ export type PackageView = NonNullable<
  */
 export async function getUniverseHeadline() {
   const db = getDb();
-  const universes = (
-    await Promise.all(ECOSYSTEMS.map((e) => getLatestUniverse(db, e)))
-  ).filter((u): u is NonNullable<typeof u> => u !== null);
+  const [universesRaw, latest] = await Promise.all([
+    Promise.all(ECOSYSTEMS.map((e) => getLatestUniverse(db, e))),
+    listLatestScores(db),
+  ]);
+  const universes = universesRaw.filter(
+    (u): u is NonNullable<typeof u> => u !== null,
+  );
   const members = universes.flatMap((u) => u.members);
   if (members.length === 0) return null;
 
-  const snaps = await Promise.all(
-    members.map((m) => getLatestScore(db, m.packageId)),
-  );
   const counts = {} as Record<Verdict, number>;
   let size = 0;
-  for (const s of snaps) {
+  for (const m of members) {
+    const s = latest.get(m.packageId);
     if (!s) continue;
     size += 1;
     counts[s.verdict as Verdict] = (counts[s.verdict as Verdict] ?? 0) + 1;
@@ -69,13 +72,17 @@ export async function getUniverseHeadline() {
 /** All scored packages, newest score first — powers the showcase grid. */
 export async function listScoredPackages() {
   const db = getDb();
-  const pkgs = await db.select().from(schema.packages);
-  const rows = await Promise.all(
-    pkgs.map(async (pkg) => ({ pkg, snapshot: await getLatestScore(db, pkg.id) })),
-  );
-  return rows
+  const [pkgs, latest] = await Promise.all([
+    db.select().from(schema.packages),
+    listLatestScores(db),
+  ]);
+  return pkgs
+    .map((pkg) => ({ pkg, snapshot: latest.get(pkg.id) ?? null }))
     .filter((r) => r.snapshot !== null)
-    .sort((a, b) => (b.snapshot!.overallScore ?? -1) - (a.snapshot!.overallScore ?? -1));
+    .sort(
+      (a, b) =>
+        (b.snapshot!.overallScore ?? -1) - (a.snapshot!.overallScore ?? -1),
+    );
 }
 
 export interface ScoredRow {
@@ -116,25 +123,27 @@ export async function getEcosystemView(ecosystem: string) {
 /** Every scored package, enriched with the fields the leaderboards rank on. */
 export async function getScoredRows(): Promise<ScoredRow[]> {
   const db = getDb();
-  const pkgs = await db.select().from(schema.packages);
-  const rows = await Promise.all(
-    pkgs.map(async (pkg): Promise<ScoredRow | null> => {
-      const s = await getLatestScore(db, pkg.id);
-      if (!s) return null;
-      const busFactor =
-        s.signalBreakdown.find((x) => x.key === "bus_factor")?.rawValue ?? null;
-      return {
-        id: pkg.id,
-        ecosystem: pkg.ecosystemId,
-        name: pkg.name,
-        verdict: s.verdict as Verdict,
-        score: s.overallScore,
-        trend: (s.trendDirection as TrendDirection | null) ?? null,
-        busFactor,
-        downloads: pkg.downloadCount,
-        transitiveDependents: pkg.transitiveDependentsCount,
-      };
-    }),
-  );
-  return rows.filter((r): r is ScoredRow => r !== null);
+  const [pkgs, latest] = await Promise.all([
+    db.select().from(schema.packages),
+    listLatestScores(db),
+  ]);
+  const out: ScoredRow[] = [];
+  for (const pkg of pkgs) {
+    const s = latest.get(pkg.id);
+    if (!s) continue;
+    const busFactor =
+      s.signalBreakdown.find((x) => x.key === "bus_factor")?.rawValue ?? null;
+    out.push({
+      id: pkg.id,
+      ecosystem: pkg.ecosystemId,
+      name: pkg.name,
+      verdict: s.verdict as Verdict,
+      score: s.overallScore,
+      trend: (s.trendDirection as TrendDirection | null) ?? null,
+      busFactor,
+      downloads: pkg.downloadCount,
+      transitiveDependents: pkg.transitiveDependentsCount,
+    });
+  }
+  return out;
 }

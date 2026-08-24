@@ -4,6 +4,11 @@ import { getScoredRows } from "../lib/data";
 
 const CHUNK = 45000;
 
+// Generated at request time, not at build: it reads the scored universe, and
+// baking that into the build makes the prerender contend for the serverless DB
+// connection. It is a single cheap query per request.
+export const dynamic = "force-dynamic";
+
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const base = loadConfig().baseUrl;
   const rows = await getScoredRows();
