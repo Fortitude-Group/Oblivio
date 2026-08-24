@@ -5,15 +5,17 @@ name: refresh
 # from ecosyste.ms and scores the stalest packages against Neon, then the pages
 # revalidate. No Redis, no server.
 #
-# Secrets (Settings -> Secrets and variables -> Actions). GitHub forbids secret
-# names beginning with GITHUB_, so the App credentials drop that prefix here and
-# are mapped back to the names the code expects in the env block below:
+# Secrets (Settings -> Secrets and variables -> Actions):
 #   DATABASE_URL             Neon direct connection string (migrations run DDL)
-#   APP_ID                   GitHub App id            -> GITHUB_APP_ID
-#   APP_INSTALLATION_ID      GitHub App installation  -> GITHUB_APP_INSTALLATION_ID
-#   APP_PRIVATE_KEY_BASE64   base64 of the App .pem   -> GITHUB_APP_PRIVATE_KEY_BASE64
+#   APP_ID                   GitHub App id
+#   APP_INSTALLATION_ID      GitHub App installation id
+#   APP_PRIVATE_KEY_BASE64   base64 of the App .pem
 #   WEB_BASE_URL             the deployed site
 #   REVALIDATE_TOKEN         shared token, matches the site's env
+#
+# GitHub reserves the GITHUB_ prefix for both secret and env names, so the App
+# credentials use plain names here and the score step exports them into the
+# GITHUB_APP_* variables the code reads.
 
 on:
   schedule:
@@ -38,9 +40,6 @@ jobs:
       UNIVERSE_SIZE: ${{ github.event.inputs.universe_size || '1000' }}
       BATCH_SIZE: ${{ github.event.inputs.batch_size || '400' }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      GITHUB_APP_ID: ${{ secrets.APP_ID }}
-      GITHUB_APP_INSTALLATION_ID: ${{ secrets.APP_INSTALLATION_ID }}
-      GITHUB_APP_PRIVATE_KEY_BASE64: ${{ secrets.APP_PRIVATE_KEY_BASE64 }}
       WEB_BASE_URL: ${{ secrets.WEB_BASE_URL }}
       REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
     steps:
@@ -55,11 +54,11 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
-        name: Install
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
-      - run: pnpm --filter @observatory/db db:migrate
-        name: Migrate (idempotent)
+      - name: Migrate (idempotent)
+        run: pnpm --filter @observatory/db db:migrate
 
       - name: Sync universe membership (ecosyste.ms)
         run: |
@@ -68,4 +67,12 @@ jobs:
           pnpm exec tsx scripts/sync-universe.ts nuget "$UNIVERSE_SIZE"
 
       - name: Score the stalest packages
-        run: pnpm exec tsx scripts/score-batch.ts "$BATCH_SIZE"
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_INSTALLATION_ID: ${{ secrets.APP_INSTALLATION_ID }}
+          APP_PRIVATE_KEY_BASE64: ${{ secrets.APP_PRIVATE_KEY_BASE64 }}
+        run: |
+          export GITHUB_APP_ID="$APP_ID"
+          export GITHUB_APP_INSTALLATION_ID="$APP_INSTALLATION_ID"
+          export GITHUB_APP_PRIVATE_KEY_BASE64="$APP_PRIVATE_KEY_BASE64"
+          pnpm exec tsx scripts/score-batch.ts "$BATCH_SIZE"
