@@ -125,7 +125,7 @@ export default async function Home() {
               <a
                 key={pkg.id}
                 className="card"
-                href={`/${pkg.ecosystemId}/${pkg.name}`}
+                href={`/${pkg.ecosystemId}/${encodeURIComponent(pkg.name)}`}
                 style={{ "--accent": style.accent } as CSSProperties}
               >
                 <span className="eco">{pkg.ecosystemId}</span>

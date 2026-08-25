@@ -103,7 +103,7 @@ export default async function EcosystemPage({
               <a
                 key={r.id}
                 className="card"
-                href={`/${r.ecosystem}/${r.name}`}
+                href={`/${r.ecosystem}/${encodeURIComponent(r.name)}`}
                 style={{ "--accent": style.accent } as CSSProperties}
               >
                 <span className="eco">{r.ecosystem}</span>

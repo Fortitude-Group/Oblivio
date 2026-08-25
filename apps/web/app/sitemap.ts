@@ -32,7 +32,7 @@ export default async function sitemap({
   const packageRoutes: MetadataRoute.Sitemap = rows
     .slice(id * CHUNK, (id + 1) * CHUNK)
     .map((r) => ({
-      url: `${base}/${r.ecosystem}/${r.name}`,
+      url: `${base}/${r.ecosystem}/${encodeURIComponent(r.name)}`,
       changeFrequency: "weekly",
       priority: 0.6,
     }));

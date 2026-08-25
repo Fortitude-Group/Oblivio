@@ -89,7 +89,7 @@ export default async function ListPage({
               <a
                 className="lb-row"
                 key={r.id}
-                href={`/${r.ecosystem}/${r.name}`}
+                href={`/${r.ecosystem}/${encodeURIComponent(r.name)}`}
                 style={{ "--accent": style.accent } as CSSProperties}
               >
                 <span className="lb-rank">{i + 1}</span>

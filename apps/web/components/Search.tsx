@@ -29,7 +29,8 @@ export function Search({ items }: { items: SearchItem[] }) {
 
   function go(i: number) {
     const m = matches[i];
-    if (m) router.push(`/${m.ecosystem}/${m.name}`);
+    // Scoped names contain "/", so encode the name into a single path segment.
+    if (m) router.push(`/${m.ecosystem}/${encodeURIComponent(m.name)}`);
   }
 
   return (

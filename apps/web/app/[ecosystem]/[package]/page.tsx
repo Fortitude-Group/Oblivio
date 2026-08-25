@@ -38,8 +38,9 @@ export async function generateMetadata({
   const verdict = (view.snapshot?.verdict ?? "insufficient_data") as Verdict;
   const style = VERDICT_STYLE[verdict];
   const cfg = loadConfig();
-  const url = `${cfg.baseUrl}/${ecosystem}/${name}`;
-  const ogImage = `${cfg.baseUrl}/og/pkg/${ecosystem}/${name}`;
+  const seg = encodeURIComponent(name);
+  const url = `${cfg.baseUrl}/${ecosystem}/${seg}`;
+  const ogImage = `${cfg.baseUrl}/og/pkg/${ecosystem}/${seg}`;
   const title = `Is ${name} maintained?`;
   return {
     title,
@@ -337,11 +338,11 @@ export default async function PackagePage({
         <div className="panel badge-box">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/badge/${ecosystem}/${name}`}
+            src={`/badge/${ecosystem}/${encodeURIComponent(name)}`}
             alt={`Observatory: ${style.label}`}
             height={20}
           />
-          <code>{`[![Observatory](${cfg.baseUrl}/badge/${ecosystem}/${name})](${cfg.baseUrl}/${ecosystem}/${name})`}</code>
+          <code>{`[![Observatory](${cfg.baseUrl}/badge/${ecosystem}/${encodeURIComponent(name)})](${cfg.baseUrl}/${ecosystem}/${encodeURIComponent(name)})`}</code>
         </div>
       </section>
 
