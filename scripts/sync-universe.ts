@@ -12,7 +12,7 @@ import { fetchMostDependedOn, CRITERIA_VERSION } from "@observatory/ingestion";
 import {
   createDb,
   upsertEcosystem,
-  upsertPackage,
+  ensurePackageShell,
   setUniverseMembership,
   saveUniverse,
 } from "@observatory/db";
@@ -40,7 +40,10 @@ const members: Array<{ packageId: string; rank: number }> = [];
 let rank = 0;
 for (const t of top) {
   rank += 1;
-  const pkg = await upsertPackage(db, { ecosystemId: ecosystem, name: t.name });
+  const pkg = await ensurePackageShell(db, {
+    ecosystemId: ecosystem,
+    name: t.name,
+  });
   await setUniverseMembership(db, {
     packageId: pkg.id,
     rank,

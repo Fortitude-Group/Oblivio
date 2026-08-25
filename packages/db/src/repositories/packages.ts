@@ -61,15 +61,73 @@ export async function upsertPackage(db: Database, input: PackageUpsert) {
         latestVersion: v.latestVersion ?? null,
         latestReleaseAt: v.latestReleaseAt ?? null,
         downloadCount: v.downloadCount ?? 0,
-        directDependentsCount: v.directDependentsCount ?? 0,
-        transitiveDependentsCount: v.transitiveDependentsCount ?? 0,
         isDeprecated: v.isDeprecated ?? false,
         isArchived: v.isArchived ?? false,
         lastIngestedAt: new Date(),
+        // NOTE: directDependentsCount / transitiveDependentsCount are deliberately
+        // NOT set here. They are owned by setUniverseMembership (fed from the
+        // universe ranking). Setting them on a facts refresh would reset them to 0.
       },
     })
     .returning();
   return out!;
+}
+
+/**
+ * Get a package by (ecosystem, name), inserting a bare shell if it doesn't exist.
+ * Unlike upsertPackage this NEVER overwrites an existing row, so defining universe
+ * membership can't wipe a package's registry facts (downloads, version, licence).
+ */
+export async function ensurePackageShell(
+  db: Database,
+  input: { ecosystemId: string; name: string },
+) {
+  const [inserted] = await db
+    .insert(packages)
+    .values({ ecosystemId: input.ecosystemId, name: input.name })
+    .onConflictDoNothing({ target: [packages.ecosystemId, packages.name] })
+    .returning();
+  if (inserted) return inserted;
+  const existing = await getPackage(db, input.ecosystemId, input.name);
+  return existing!;
+}
+
+/**
+ * Update ONLY the registry-derived facts on an existing package (downloads,
+ * latest version/release, licence, declared repo, deprecation). Leaves the repo
+ * link, membership, dependent counts and score history untouched. Cheap (no repo
+ * host, no scoring) and safe to re-run; used to refresh or repair facts.
+ */
+export async function updateRegistryFacts(
+  db: Database,
+  input: {
+    ecosystemId: string;
+    name: string;
+    declaredRepoUrl?: string | null;
+    declaredLicense?: string | null;
+    latestVersion?: string | null;
+    latestReleaseAt?: Date | null;
+    downloadCount?: number;
+    isDeprecated?: boolean;
+  },
+) {
+  await db
+    .update(packages)
+    .set({
+      declaredRepoUrl: input.declaredRepoUrl ?? null,
+      declaredLicense: input.declaredLicense ?? null,
+      latestVersion: input.latestVersion ?? null,
+      latestReleaseAt: input.latestReleaseAt ?? null,
+      downloadCount: input.downloadCount ?? 0,
+      isDeprecated: input.isDeprecated ?? false,
+      lastIngestedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(packages.ecosystemId, input.ecosystemId),
+        eq(packages.name, input.name),
+      ),
+    );
 }
 
 /** Mark a package as a member of the current working universe (FR-003). */

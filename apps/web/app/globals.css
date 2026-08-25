@@ -624,19 +624,44 @@ a {
   height: 20px;
   width: auto;
 }
-.badge-box code {
+.badge-md {
   align-self: stretch;
-}
-.badge-box code {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12.5px;
+  line-height: 1.55;
   color: var(--text-dim);
   background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px 16px;
-  overflow-x: auto;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.badge-md:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+.badge-copy {
+  align-self: flex-start;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.badge-copy:hover {
+  border-color: var(--brand);
+  color: var(--brand);
 }
 
 .methodology-note {

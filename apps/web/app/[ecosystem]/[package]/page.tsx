@@ -9,6 +9,7 @@ import { compact, fullDate, relativeTime } from "../../../lib/format";
 import { getPackageView } from "../../../lib/data";
 import { TrendChart } from "../../../components/TrendChart";
 import { StatusIcon } from "../../../components/StatusIcon";
+import { BadgeEmbed } from "../../../components/BadgeEmbed";
 
 export const revalidate = 3600; // ISR: regenerate on the pipeline's cadence.
 
@@ -335,15 +336,11 @@ export default async function PackagePage({
         <div className="section-head">
           <h2>Embed the badge</h2>
         </div>
-        <div className="panel badge-box">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/badge/${ecosystem}/${encodeURIComponent(name)}`}
-            alt={`Observatory: ${style.label}`}
-            height={20}
-          />
-          <code>{`[![Observatory](${cfg.baseUrl}/badge/${ecosystem}/${encodeURIComponent(name)})](${cfg.baseUrl}/${ecosystem}/${encodeURIComponent(name)})`}</code>
-        </div>
+        <BadgeEmbed
+          badgeSrc={`/badge/${ecosystem}/${encodeURIComponent(name)}`}
+          alt={`Observatory: ${style.label}`}
+          markdown={`[![Observatory](${cfg.baseUrl}/badge/${ecosystem}/${encodeURIComponent(name)})](${cfg.baseUrl}/${ecosystem}/${encodeURIComponent(name)})`}
+        />
       </section>
 
       {/* honest on-ramp: OSPulse + the related PoisonBox */}
