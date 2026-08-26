@@ -8,8 +8,17 @@ export interface TrendPoint {
 }
 
 /**
- * Health-over-time chart from the daily-downsampled history (FR-011). Renders
- * only when there are at least two data points; a single snapshot is not a trend.
+ * Minimum distinct days before a line is worth drawing. Below this the history is
+ * one or two dots, which draws as a flat segment that reads as a bug rather than a
+ * trend, so we show an honest "still gathering" note instead. A package is
+ * re-scored every couple of days, so this fills in within a week or two.
+ */
+const MIN_POINTS = 4;
+
+/**
+ * Health-over-time chart from the daily-downsampled history (FR-011). It needs a
+ * few distinct days to be a real trend; with fewer it shows a short note about
+ * history still building rather than a misleading near-flat line.
  */
 export function TrendChart({
   points,
@@ -21,7 +30,25 @@ export function TrendChart({
   const usable = points.filter(
     (p): p is { day: string; score: number } => p.score !== null,
   );
-  if (usable.length < 2) return null;
+  if (usable.length === 0) return null;
+
+  if (usable.length < MIN_POINTS) {
+    const days = usable.length;
+    return (
+      <section className="section">
+        <div className="section-head">
+          <h2>Health over time</h2>
+        </div>
+        <div className="panel trend-pending">
+          <p>
+            We&rsquo;ve scored this package on {days} day{days === 1 ? "" : "s"}{" "}
+            so far. The health-over-time chart shows up once there&rsquo;s a bit
+            more history to plot, usually within a week or two of first tracking.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   const W = 640;
   const H = 150;

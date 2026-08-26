@@ -737,6 +737,21 @@ a {
   height: 150px;
   display: block;
 }
+.trend-pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  padding: 22px 24px;
+  text-align: center;
+}
+.trend-pending p {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
 
 /* ---- search ---- */
 .search-row {
