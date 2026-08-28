@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Space_Grotesk, Chakra_Petch } from "next/font/google";
 import { ThemeToggle } from "../components/ThemeToggle";
 import "./globals.css";
 
@@ -13,6 +13,13 @@ const inter = Inter({
 const grotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-display",
+  display: "swap",
+});
+// The Fortitude Omnis house title font (matches PoisonBox and the estate).
+const brandFont = Chakra_Petch({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-brand",
   display: "swap",
 });
 
@@ -32,19 +39,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${grotesk.variable}`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${grotesk.variable} ${brandFont.variable}`}
+    >
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <div className="aurora" aria-hidden />
         <header className="site-header">
           <div className="inner">
-            <a href="/" className="brand" aria-label="Oblivio, home">
-              <span className="mark" aria-hidden />
-              <span className="brand-name">
-                Oblivio
-                <small>maintenance health</small>
+            <div className="brand">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="brand-logo"
+                src="/fortitude-logo.png"
+                alt=""
+                width={40}
+                height={40}
+              />
+              <span className="brand-wm">
+                <a href="/" className="brand-name" aria-label="Oblivio, home">
+                  Oblivio
+                </a>
+                <a
+                  href="https://fortitude-omnis.group"
+                  target="_blank"
+                  rel="noopener"
+                  className="brand-by"
+                >
+                  by Fortitude Omnis
+                </a>
               </span>
-            </a>
+            </div>
             <nav className="header-actions" aria-label="Primary">
               <a href="/lists">Leaderboards</a>
               <a href="/api-docs">API</a>

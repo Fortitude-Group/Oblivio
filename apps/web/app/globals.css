@@ -1037,36 +1037,55 @@ a {
   justify-content: space-between;
   gap: 16px;
 }
+/* House header title (matches PoisonBox and the Fortitude estate): the lion mark,
+   the app name in the brand font, and a "by Fortitude Omnis" link to the apex. */
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  text-decoration: none;
+  gap: 13px;
 }
-.brand .mark {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: #eef4f3 url("/fortitude-logo.png") center / 26px 26px no-repeat;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+.brand-logo {
+  width: 40px;
+  height: 40px;
   flex: none;
+  /* Dark surface (default): show the petrol lion as a light lion with a teal glow. */
+  filter: brightness(0) invert(1) drop-shadow(0 0 11px rgba(45, 212, 191, 0.3));
+}
+:root[data-theme="light"] .brand-logo {
+  /* Light surface: the petrol lion reads directly. */
+  filter: drop-shadow(0 0 8px rgba(21, 82, 99, 0.16));
+}
+.brand-wm {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
 }
 .brand-name {
-  font-family: var(--font-display), sans-serif;
-  font-size: 23px;
+  font-family: var(--font-brand), "Chakra Petch", system-ui, sans-serif;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   color: var(--brand);
+  text-decoration: none;
 }
-.brand-name small {
-  display: block;
+.brand-by {
+  align-self: flex-start;
+  margin-top: 2px;
   font-family: var(--font-sans), sans-serif;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--text-faint);
-  margin-top: -2px;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+.brand-by:hover {
+  color: var(--brand);
+  border-color: var(--brand);
 }
 .header-actions {
   display: flex;
