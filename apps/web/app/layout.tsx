@@ -67,7 +67,7 @@ export default function RootLayout({
                   rel="noopener"
                   className="brand-by"
                 >
-                  by Fortitude Omnis
+                  by Fortitude Omnis Group
                 </a>
               </span>
             </div>
