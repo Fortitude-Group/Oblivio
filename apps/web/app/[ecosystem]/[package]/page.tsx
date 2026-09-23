@@ -5,7 +5,7 @@ import type { Verdict } from "@observatory/core";
 import { SIGNAL_CATALOGUE } from "@observatory/scoring-engine";
 import { loadConfig } from "@observatory/config";
 import { VERDICT_STYLE } from "../../../lib/verdict";
-import { compact, fullDate, relativeTime } from "../../../lib/format";
+import { compact, fullDate, relativeTime, shortLicense } from "../../../lib/format";
 import { getPackageView } from "../../../lib/data";
 import { TrendChart } from "../../../components/TrendChart";
 import { StatusIcon } from "../../../components/StatusIcon";
@@ -231,7 +231,9 @@ export default async function PackagePage({
           </div>
           <div className="stat">
             <div className="label">Licence</div>
-            <div className="value">{pkg.declaredLicense ?? "n/a"}</div>
+            <div className="value" title={pkg.declaredLicense ?? undefined}>
+              {shortLicense(pkg.declaredLicense)}
+            </div>
             <div className="sub">declared</div>
           </div>
           <div className="stat">

@@ -22,6 +22,19 @@ export function relativeTime(input: string | Date | null): string {
     : `${years} year${years === 1 ? "" : "s"} ago`;
 }
 
+// Some registries dump the entire licence text into the declared-licence field
+// (e.g. pandas ships the full BSD 3-Clause text). This stat wants a short label,
+// so take the first meaningful line and cap it.
+export function shortLicense(input: string | null | undefined): string {
+  if (!input) return "n/a";
+  const firstLine = input
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+  if (!firstLine) return "n/a";
+  return firstLine.length > 40 ? `${firstLine.slice(0, 39).trimEnd()}…` : firstLine;
+}
+
 export function fullDate(input: string | Date | null): string {
   if (!input) return "n/a";
   const d = typeof input === "string" ? new Date(input) : input;

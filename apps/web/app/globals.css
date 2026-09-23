@@ -415,6 +415,8 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 14px;
+  /* Don't let one tall cell stretch the whole row to match it. */
+  align-items: start;
 }
 .stat {
   padding: 18px 20px;
@@ -443,6 +445,8 @@ a {
   font-weight: 600;
   margin-top: 8px;
   letter-spacing: -0.01em;
+  /* Long values (e.g. a licence string) wrap instead of overflowing. */
+  overflow-wrap: anywhere;
 }
 .stat .sub {
   font-size: 12.5px;
